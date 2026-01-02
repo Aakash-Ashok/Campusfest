@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Results{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h3>🏆 Results</h3>
+        <a href="{% url 'result_add' %}" class="btn btn-success">➕ Add Result</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Event</th>
+                    <th>Team</th>
+                    <th>Position</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in results %}
+                <tr>
+                    <td>{{ r.event.name }}</td>
+                    <td>{{ r.team.team_name }}</td>
+                    <td>{{ r.position }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'result_edit' r.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'result_delete' r.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        <a href="{% url 'winner_certificate' r.id %}" class="btn btn-sm btn-success">
+                            Certificate
+                        </a>
+                    </td>
+
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No results found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>{{ event.name }}</h2>
+
+<h3>Results</h3>
+<table>
+<tr><th>Position</th><th>Team</th></tr>
+{% for r in results %}
+<tr>
+    <td>{{ r.position }}</td>
+    <td>{{ r.team.team_name }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h3>Participants</h3>
+<ul>
+{% for p in participants %}
+    <li>{{ p.team.team_name }} - {{ p.participant_name }}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

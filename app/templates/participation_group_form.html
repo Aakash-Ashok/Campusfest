@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>{{ event.name }} – Group Participation</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+
+    <!-- TEAM SELECTED ONCE -->
+    <div class="mb-3">
+        <label class="form-label"><strong>Team</strong></label>
+        <select name="team" class="form-select" required>
+            {% for team in teams %}
+                <option value="{{ team.id }}">{{ team.team_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Participant Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for form in formset %}
+            <tr>
+                <td>{{ form.participant_name }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success">Save Group</button>
+</form>
+
+{% endblock %}

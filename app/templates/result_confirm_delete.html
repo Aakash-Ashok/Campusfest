@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Delete Result?</h3>
+<p>{{ result.event.name }} - {{ result.team.team_name }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirm Delete</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Team Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h3 class="fw-bold">{{ team.team_name }}</h3>
+        <p class="text-muted mb-0">Department of {{ team.department }}</p>
+    </div>
+
+    <!-- EVENTS -->
+    {% for row in event_data %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <strong>{{ row.event.name }}</strong>
+            <span class="badge bg-info ms-2">{{ row.event.event_type }}</span>
+            <span class="badge bg-success">{{ row.event.stage_type }}</span>
+        </div>
+
+        <div class="card-body">
+            <!-- PARTICIPANTS -->
+            <h6>👥 Participants</h6>
+            <ul>
+                {% for name in row.participants %}
+                    <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+
+            <!-- RESULT -->
+            {% if row.result %}
+                <p class="mb-0">
+                    🏆 <strong>Position:</strong> {{ row.result.position }} <br>
+                    ⭐ <strong>Points:</strong> {{ row.result.points }}
+                </p>
+            {% else %}
+                <p class="text-muted mb-0">Result not published</p>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+        <p class="text-muted">No participation records found.</p>
+    {% endfor %}
+
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+        ⬅ Back to Dashboard
+    </a>
+
+</div>
+{% endblock %}

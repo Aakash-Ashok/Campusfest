@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Event Form{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <h3 class="mb-3">✏ Event Details</h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'event_list' %}" class="btn btn-secondary">Cancel</a>
+                    <button class="btn btn-success">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

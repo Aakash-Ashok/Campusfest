@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Teams{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h3>👥 Teams</h3>
+        <a href="{% url 'team_create' %}" class="btn btn-success">➕ Add Team</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Team</th>
+                    <th>Department</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for t in teams %}
+                <tr>
+                    <td>{{ t.team_name }}</td>
+                    <td>{{ t.department }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'team_edit' t.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'team_delete' t.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        <a href="{% url 'team_participation_pdf' t.id %}" class="btn btn-sm btn-primary">PDF</a>
+                    </td>
+
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">No teams found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

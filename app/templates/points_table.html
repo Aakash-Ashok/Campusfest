@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Points Table{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">🏆 Points Table</h2>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Rank</th>
+            <th>Team</th>
+            <th>Department</th>
+            <th>Total Points</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in points %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ p.team__team_name }}</td>
+            <td>{{ p.team__department }}</td>
+            <td>{{ p.total_points }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

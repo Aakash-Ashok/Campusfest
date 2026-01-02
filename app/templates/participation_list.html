@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Participation{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- ================= HEADER ================= -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1">🎭 Participation</h3>
+            <p class="text-muted mb-0">Event-wise team participation details</p>
+        </div>
+    </div>
+
+    <!-- ================= TABLE CARD ================= -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:25%">Event</th>
+                        <th style="width:20%">Team</th>
+                        <th>Participants</th>
+                        <th style="width:18%" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in grouped_data %}
+                    <tr>
+
+                        <!-- INDEX -->
+                        <td class="fw-semibold">{{ forloop.counter }}</td>
+
+                        <!-- EVENT -->
+                        <td>
+                            <div class="fw-semibold">{{ row.event.name }}</div>
+
+                            <div class="mt-1">
+
+                                <!-- EVENT TYPE BADGE -->
+                                {% if row.event.event_type == 'SINGLE' %}
+                                    <span class="badge bg-primary">
+                                        Single
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-purple">
+                                        Group
+                                    </span>
+                                {% endif %}
+
+                                <!-- STAGE TYPE BADGE -->
+                                {% if row.event.stage_type == 'ON_STAGE' %}
+                                    <span class="badge bg-success">
+                                        On Stage
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        Off Stage
+                                    </span>
+                                {% endif %}
+
+                            </div>
+                        </td>
+
+                        <!-- TEAM -->
+                        <td>
+                            <div class="fw-semibold">{{ row.team.team_name }}</div>
+                            <small class="text-muted">{{ row.team.department }}</small>
+                        </td>
+
+                        <!-- PARTICIPANTS -->
+                        <td>
+                            <ul class="mb-0 ps-3">
+                                {% for name in row.participants %}
+                                    <li>{{ name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+
+                        <!-- ACTIONS -->
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                <a href="{% url 'participation_edit' row.event.id row.team.id %}"
+                                   class="btn btn-sm btn-outline-warning">
+                                    ✏ Edit
+                                </a>
+
+                                <a href="{% url 'participation_delete' row.event.id row.team.id %}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Delete all participants for this team in this event?');">
+                                    🗑 Delete
+                                </a>
+                            </div>
+                        </td>
+
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No participation records found
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= CUSTOM STYLES ================= -->
+<style>
+.bg-purple {
+    background-color: #6f42c1; /* Purple for GROUP events */
+}
+</style>
+
+{% endblock %}

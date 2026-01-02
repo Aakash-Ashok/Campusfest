@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- ================= HEADER ================= -->
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1">Admin Dashboard</h3>
+        <p class="text-muted mb-0">Campus Fest administration panel</p>
+    </div>
+
+    <!-- ================= ACTION CARDS ================= -->
+    <div class="row g-4 mb-5">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <div class="icon-circle bg-primary-soft mb-3">🎉</div>
+                    <h6 class="fw-semibold">Events</h6>
+                    <p class="text-muted small">Create & manage events</p>
+                    <a href="{% url 'event_list' %}" class="btn btn-primary btn-sm w-100">
+                        Manage Events
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <div class="icon-circle bg-success-soft mb-3">👥</div>
+                    <h6 class="fw-semibold">Teams</h6>
+                    <p class="text-muted small">Departments & teams</p>
+                    <a href="{% url 'team_list' %}" class="btn btn-success btn-sm w-100">
+                        Manage Teams
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <div class="icon-circle bg-warning-soft mb-3">🧾</div>
+                    <h6 class="fw-semibold">Participation</h6>
+                    <p class="text-muted small">Participants & groups</p>
+                    <a href="{% url 'participation_list' %}" class="btn btn-warning btn-sm w-100">
+                        View Participation
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <div class="icon-circle bg-danger-soft mb-3">🏆</div>
+                    <h6 class="fw-semibold">Results</h6>
+                    <p class="text-muted small">Publish results & points</p>
+                    <a href="{% url 'result_list' %}" class="btn btn-danger btn-sm w-100">
+                        Manage Results
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= LEADERBOARD ================= -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">🏆 Team Leaderboard</h6>
+            <a href="{% url 'points_table' %}" class="btn btn-sm btn-light">
+                View Full Table
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:10%">Rank</th>
+                        <th>Team</th>
+                        <th>Department</th>
+                        <th class="text-end">Total Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for p in points %}
+                    <tr>
+
+                        <!-- RANK -->
+                        <td>
+                            {% if forloop.counter == 1 %}
+                                🥇
+                            {% elif forloop.counter == 2 %}
+                                🥈
+                            {% elif forloop.counter == 3 %}
+                                🥉
+                            {% else %}
+                                {{ forloop.counter }}
+                            {% endif %}
+                        </td>
+
+                        <!-- TEAM (CLICKABLE) -->
+                        <td class="fw-semibold">
+                            <a href="{% url 'team_detail' p.id %}"
+                               class="text-decoration-none text-dark fw-semibold">
+                                {{ p.team_name }}
+                            </a>
+                        </td>
+
+                        <!-- DEPARTMENT -->
+                        <td>{{ p.department }}</td>
+
+                        <!-- TOTAL POINTS -->
+                        <td class="text-end fw-bold">
+                            {{ p.total_points }}
+                        </td>
+
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            No teams found
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= STYLES ================= -->
+<style>
+.dashboard-card {
+    border-radius: 14px;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+}
+.icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+}
+.bg-primary-soft { background: rgba(13,110,253,0.12); }
+.bg-success-soft { background: rgba(25,135,84,0.12); }
+.bg-warning-soft { background: rgba(255,193,7,0.18); }
+.bg-danger-soft  { background: rgba(220,53,69,0.12); }
+</style>
+
+{% endblock %}

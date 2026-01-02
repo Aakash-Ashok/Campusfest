@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Campus Fest Events</h2>
+
+<ul>
+{% for e in events %}
+    <li>
+        <a href="{% url 'public_event_result' e.id %}">
+            {{ e.name }} ({{ e.stage_type }})
+        </a>
+    </li>
+{% endfor %}
+</ul>
+
+{% endblock %}

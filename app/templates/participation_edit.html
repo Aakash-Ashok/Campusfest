@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Edit Participation{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">✏ Edit Participation</h5>
+        <a href="{% url 'participation_list' %}" class="btn btn-light btn-sm">
+            ⬅ Back
+        </a>
+    </div>
+
+    <div class="card-body">
+
+        <!-- EVENT & TEAM INFO -->
+        <div class="mb-3">
+            <strong>Event:</strong> {{ event.name }}
+            <span class="badge bg-info ms-2">{{ event.event_type }}</span>
+            <span class="badge bg-success">{{ event.stage_type }}</span>
+        </div>
+
+        <div class="mb-4">
+            <strong>Team:</strong> {{ team.team_name }}
+            <small class="text-muted">({{ team.department }})</small>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- ========================= -->
+            <!-- ERROR DISPLAY (CRITICAL) -->
+            <!-- ========================= -->
+            {% if form and form.errors %}
+                <div class="alert alert-danger">
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            {% if formset and formset.non_form_errors %}
+                <div class="alert alert-danger">
+                    {{ formset.non_form_errors }}
+                </div>
+            {% endif %}
+
+            {% if formset and formset.errors %}
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        {% for err in formset.errors %}
+                            {% if err %}
+                                <li>{{ err }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- ========================= -->
+            <!-- SINGLE EVENT -->
+            <!-- ========================= -->
+            {% if event.event_type == 'SINGLE' %}
+                {{ form.as_p }}
+
+            <!-- ========================= -->
+            <!-- GROUP EVENT -->
+            <!-- ========================= -->
+            {% else %}
+                {{ formset.management_form }}
+
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:70%">Participant Name</th>
+                            <th style="width:15%" class="text-center">Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for form in formset %}
+                        {{ form.id }}  <!-- 🔥 REQUIRED: identifies existing row -->
+                        <tr>
+                            <td>
+                                {{ form.participant_name }}
+                            </td>
+                            <td class="text-center">
+                                {% if form.DELETE %}
+                                    {{ form.DELETE }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <p class="text-muted small">
+                    Min {{ event.min_team_size }} /
+                    Max {{ event.max_team_size }} participants
+                </p>
+            {% endif %}
+
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <a href="{% url 'participation_list' %}" class="btn btn-secondary">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-success">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
