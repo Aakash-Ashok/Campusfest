@@ -18,6 +18,30 @@ from .forms import (
     ParticipationFormSet,
 )
 
+
+import os
+from django.contrib.auth.models import User
+from django.http import HttpResponse, HttpResponseForbidden
+
+def create_superuser_once(request):
+    key = request.GET.get("key")
+    expected_key = os.environ.get("ADMIN_SETUP_KEY")
+
+    if not expected_key or key != expected_key:
+        return HttpResponseForbidden("Access denied")
+
+    if User.objects.filter(is_superuser=True).exists():
+        return HttpResponse("Superuser already exists")
+
+    User.objects.create_superuser(
+        username="admin",
+        email="admin@example.com",
+        password="admin"
+    )
+
+    return HttpResponse("Superuser created successfully")
+
+
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('admin_dashboard')
