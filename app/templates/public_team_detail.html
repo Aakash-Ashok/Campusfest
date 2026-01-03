@@ -2,66 +2,261 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ team.team_name }} | Team Details</title>
+    <title>{{ team.team_name }} | Ramitham 2025–26</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Bootstrap (layout only) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        :root {
+            --red: #FF0000;
+            --light-red: #fff1f1;
+            --white: #ffffff;
+        }
+
         body {
-            background: linear-gradient(135deg, #f8fafc, #eef2ff);
+            background: linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
+            min-height: 100vh;
+            color: #222;
+        }
+
+        /* ================= HEADER ================= */
+        .page-header {
+            padding: 55px 15px 35px;
+            text-align: center;
+            border-bottom: 5px solid var(--red);
+        }
+
+        .page-header h1 {
+            color: var(--red);
+            font-weight: 900;
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+        }
+
+        .page-header p {
+            margin: 0;
+            color: #555;
+            font-size: .95rem;
+        }
+
+        /* ================= SUMMARY ================= */
+        .summary-wrap {
+            margin-top: -35px;
+        }
+
+        .summary-card {
+            background: var(--white);
+            border-radius: 18px;
+            border: 3px solid var(--red);
+            box-shadow: 0 18px 45px rgba(0,0,0,.12);
+            padding: 28px;
+            text-align: center;
+        }
+
+        .points {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--red);
+            line-height: 1;
+        }
+
+        .points-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 12px;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            background: var(--red);
+            color: #fff;
+            font-weight: 700;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: .95rem;
+        }
+
+        /* ================= EVENT BLOCK ================= */
+        .event-block {
+            background: var(--white);
+            border-radius: 18px;
+            border: 2px solid var(--red);
+            box-shadow: 0 12px 35px rgba(0,0,0,.1);
+            margin-bottom: 28px;
+            overflow: hidden;
+        }
+
+        .event-header {
+            background: var(--red);
+            color: #fff;
+            padding: 14px 20px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-badges span {
+            background: #fff;
+            color: var(--red);
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 3px 12px;
+            font-size: .75rem;
+            margin-left: 6px;
+        }
+
+        .event-body {
+            padding: 20px;
+        }
+
+        /* ================= PARTICIPANTS ================= */
+        .participants-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .participants-list {
+            padding-left: 18px;
+            margin-bottom: 14px;
+        }
+
+        .participants-list li {
+            margin-bottom: 4px;
+        }
+
+        /* ================= RESULT ================= */
+        .result-box {
+            background: var(--light-red);
+            border-left: 6px solid var(--red);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .medal {
+            font-size: 1.4rem;
+            margin-right: 6px;
+        }
+
+        /* ================= BACK BUTTON ================= */
+        .back-btn {
+            border: 2px solid var(--red);
+            color: var(--red);
+            font-weight: 600;
+            padding: 10px 26px;
+            border-radius: 50px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        footer {
+            border-top: 2px solid var(--red);
+            color: #555;
+            padding-top: 12px;
+            margin-top: 40px;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container py-4">
+<!-- ================= HEADER ================= -->
+<section class="page-header">
+    <h1>{{ team.team_name }}</h1>
+    <p>
+        Department of {{ team.department }} · Ramitham 2025–26<br>
+        Dr. Janaki Ammal Campus, Palayad
+    </p>
+</section>
 
-    <!-- HEADER -->
-    <div class="mb-4 text-center">
-        <h2 class="fw-bold">{{ team.team_name }}</h2>
-        <p class="text-muted">Department of {{ team.department }}</p>
+<!-- ================= SUMMARY ================= -->
+<div class="container summary-wrap">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="summary-card">
+                <div class="points">{{ team.total_points }}</div>
+                <div class="points-label">Total Points</div>
+                <span class="rank-badge">
+                    🏅 Overall Rank: {{ team.rank }}
+                </span>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- EVENTS -->
+<!-- ================= EVENTS ================= -->
+<div class="container py-5">
+
     {% for row in event_data %}
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-light">
-                <strong>{{ row.event.name }}</strong>
-                <span class="badge bg-info ms-2">{{ row.event.event_type }}</span>
-                <span class="badge bg-success">{{ row.event.stage_type }}</span>
+        <div class="event-block">
+
+            <!-- EVENT HEADER -->
+            <div class="event-header">
+                <span>{{ row.event.name }}</span>
+                <div class="event-badges">
+                    <span>{{ row.event.event_type }}</span>
+                    <span>{{ row.event.stage_type }}</span>
+                </div>
             </div>
 
-            <div class="card-body">
-                <h6>👥 Participants</h6>
-                <ul>
+            <!-- EVENT BODY -->
+            <div class="event-body">
+
+                <!-- PARTICIPANTS -->
+                <div class="participants-title">👥 Participants</div>
+                <ul class="participants-list">
                     {% for name in row.participants %}
                         <li>{{ name }}</li>
                     {% endfor %}
                 </ul>
 
+                <!-- RESULT -->
                 {% if row.result %}
-                    <p class="mb-0">
-                        🏆 <strong>Position:</strong> {{ row.result.position }} <br>
-                        ⭐ <strong>Points:</strong> {{ row.result.points }}
-                    </p>
+                    <div class="result-box">
+                        {% if row.result.position == 1 %}
+                            <span class="medal">🥇</span>
+                        {% elif row.result.position == 2 %}
+                            <span class="medal">🥈</span>
+                        {% elif row.result.position == 3 %}
+                            <span class="medal">🥉</span>
+                        {% endif %}
+                        <strong>Position:</strong> {{ row.result.position }} <br>
+                        <strong>Points:</strong> {{ row.result.points }}
+                    </div>
                 {% else %}
-                    <p class="text-muted mb-0">Result not published</p>
+                    <p class="text-muted mb-0">
+                        Result not published
+                    </p>
                 {% endif %}
+
             </div>
         </div>
     {% empty %}
-        <p class="text-center text-muted">No participation records found.</p>
+        <p class="text-center text-muted">
+            No participation records found.
+        </p>
     {% endfor %}
 
-    <div class="text-center">
-        <a href="{% url 'public_index' %}" class="btn btn-secondary">
+    <!-- BACK -->
+    <div class="text-center mt-4">
+        <a href="{% url 'public_index' %}" class="back-btn">
             ⬅ Back to Leaderboard
         </a>
     </div>
-
 </div>
+
+<!-- ================= FOOTER ================= -->
+<footer class="text-center small pb-3">
+    © Ramitham 2025–26 · Department Students’ Union<br>
+    Dr. Janaki Ammal Campus, Palayad
+</footer>
 
 </body>
 </html>
