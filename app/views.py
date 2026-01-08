@@ -614,37 +614,78 @@ def public_event_result(request, event_id):
 
 
 
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Sum, Count, Q
+from django.db.models.functions import Coalesce
+
+from .models import Team, Result
+
+
+def ordinal(n):
+    if 10 <= n % 100 <= 20:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
+    return f"{n}{suffix}"
+
 
 def public_team_detail(request, team_id):
     team = get_object_or_404(Team, id=team_id)
 
-    participations = (
-        Participation.objects
+    # ================= TOTAL POINTS =================
+    total_points = (
+        Result.objects
         .filter(team=team)
-        .select_related('event')
-        .order_by('event__name')
+        .aggregate(tp=Coalesce(Sum('points'), 0))
+        ['tp']
     )
 
-    results = {
-        r.event_id: r
-        for r in Result.objects.filter(team=team)
-    }
+    # ================= RANK CALCULATION =================
+    teams = (
+        Team.objects
+        .annotate(
+            total_points=Coalesce(Sum('results__points'), 0)
+        )
+        .order_by('-total_points', 'team_name')
+    )
 
-    event_data = {}
-    for p in participations:
-        event = p.event
-        if event.id not in event_data:
-            event_data[event.id] = {
-                'event': event,
-                'participants': [],
-                'result': results.get(event.id)
-            }
-        event_data[event.id]['participants'].append(p.participant_name)
+    team_rank = 1
+    for idx, t in enumerate(teams, start=1):
+        if t.id == team.id:
+            team_rank = idx
+            break
+
+    # ================= MEDAL COUNTS =================
+    medal_count = Result.objects.filter(team=team).aggregate(
+        gold=Coalesce(Count('id', filter=Q(position=1)), 0),
+        silver=Coalesce(Count('id', filter=Q(position=2)), 0),
+        bronze=Coalesce(Count('id', filter=Q(position=3)), 0),
+    )
+
+    # ================= EVENT DATA =================
+    event_data = []
+    results = Result.objects.filter(team=team).select_related('event')
+
+    for r in results:
+        participants = list(
+            team.participations
+            .filter(event=r.event)
+            .values_list('participant_name', flat=True)
+        )
+
+        event_data.append({
+            'event': r.event,
+            'participants': participants,
+            'result': r
+        })
 
     return render(request, 'public_team_detail.html', {
         'team': team,
-        'event_data': event_data.values()
+        'total_points': total_points,
+        'rank': team_rank,
+        'overall_place': ordinal(team_rank),
+        'medal_count': medal_count,
+        'event_data': event_data
     })
 
 

@@ -1,262 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{{ team.team_name }} | Ramitham 2025–26</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>{{ team.team_name }} | Ramitham 2025–26</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Bootstrap (layout only) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --red: #FF0000;
-            --light-red: #fff1f1;
-            --white: #ffffff;
-        }
+<style>
+:root{
+    --red:#FF0000;
+    --soft:#fff3f3;
+}
 
-        body {
-            background: linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
-            min-height: 100vh;
-            color: #222;
-        }
+body{
+    font-family:'Patrick Hand', cursive;
+    background: linear-gradient(180deg, #ffeaea, #ffffff);
+}
 
-        /* ================= HEADER ================= */
-        .page-header {
-            padding: 55px 15px 35px;
-            text-align: center;
-            border-bottom: 5px solid var(--red);
-        }
+/* ================= HEADER ================= */
+.page-header{
+    text-align:center;
+    padding:60px 15px 40px;
+}
 
-        .page-header h1 {
-            color: var(--red);
-            font-weight: 900;
-            letter-spacing: .5px;
-            margin-bottom: 6px;
-        }
+.page-header h1{
+    font-size:3rem;
+    font-weight:900;
+    color:var(--red);
+}
 
-        .page-header p {
-            margin: 0;
-            color: #555;
-            font-size: .95rem;
-        }
+/* ================= SUMMARY ================= */
+.summary-card{
+    background:white;
+    border:4px dashed var(--red);
+    border-radius:26px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 20px 45px rgba(0,0,0,.18);
+}
 
-        /* ================= SUMMARY ================= */
-        .summary-wrap {
-            margin-top: -35px;
-        }
+.points{
+    font-size:3.2rem;
+    font-weight:900;
+    color:var(--red);
+}
 
-        .summary-card {
-            background: var(--white);
-            border-radius: 18px;
-            border: 3px solid var(--red);
-            box-shadow: 0 18px 45px rgba(0,0,0,.12);
-            padding: 28px;
-            text-align: center;
-        }
+.rank-badge{
+    margin-top:14px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+    background:var(--red);
+    color:white;
+    padding:10px 26px;
+    border-radius:30px;
+    font-size:1.25rem;
+    font-weight:700;
+}
 
-        .points {
-            font-size: 3rem;
-            font-weight: 900;
-            color: var(--red);
-            line-height: 1;
-        }
+.rank-icon{
+    font-size:2rem;
+}
 
-        .points-label {
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 12px;
-        }
+/* ================= MEDAL COUNT ================= */
+.medal-count{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    margin-top:16px;
+    font-size:1.1rem;
+    font-weight:700;
+}
 
-        .rank-badge {
-            display: inline-block;
-            background: var(--red);
-            color: #fff;
-            font-weight: 700;
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-size: .95rem;
-        }
+.medal-item{
+    background:white;
+    border:2px solid var(--red);
+    padding:6px 16px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.medal-item span{
+    font-size:1.4rem;
+}
 
-        /* ================= EVENT BLOCK ================= */
-        .event-block {
-            background: var(--white);
-            border-radius: 18px;
-            border: 2px solid var(--red);
-            box-shadow: 0 12px 35px rgba(0,0,0,.1);
-            margin-bottom: 28px;
-            overflow: hidden;
-        }
+/* ================= EVENT CARD ================= */
+.event-block{
+    background:white;
+    border:3px solid var(--red);
+    border-radius:22px;
+    box-shadow:0 16px 40px rgba(0,0,0,.15);
+    margin-bottom:30px;
+}
 
-        .event-header {
-            background: var(--red);
-            color: #fff;
-            padding: 14px 20px;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.event-header{
+    background:var(--red);
+    color:white;
+    padding:14px 20px;
+    font-size:1.2rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
 
-        .event-badges span {
-            background: #fff;
-            color: var(--red);
-            font-weight: 600;
-            border-radius: 20px;
-            padding: 3px 12px;
-            font-size: .75rem;
-            margin-left: 6px;
-        }
+.event-badges span{
+    background:white;
+    color:var(--red);
+    border-radius:16px;
+    padding:3px 12px;
+    font-size:.8rem;
+    margin-left:6px;
+}
 
-        .event-body {
-            padding: 20px;
-        }
+.event-body{
+    padding:20px;
+}
 
-        /* ================= PARTICIPANTS ================= */
-        .participants-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
+.result-box{
+    background:var(--soft);
+    border-left:6px solid var(--red);
+    padding:12px 16px;
+    border-radius:12px;
+    font-weight:600;
+}
 
-        .participants-list {
-            padding-left: 18px;
-            margin-bottom: 14px;
-        }
-
-        .participants-list li {
-            margin-bottom: 4px;
-        }
-
-        /* ================= RESULT ================= */
-        .result-box {
-            background: var(--light-red);
-            border-left: 6px solid var(--red);
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
-
-        .medal {
-            font-size: 1.4rem;
-            margin-right: 6px;
-        }
-
-        /* ================= BACK BUTTON ================= */
-        .back-btn {
-            border: 2px solid var(--red);
-            color: var(--red);
-            font-weight: 600;
-            padding: 10px 26px;
-            border-radius: 50px;
-            text-decoration: none;
-        }
-
-        .back-btn:hover {
-            background: var(--red);
-            color: #fff;
-        }
-
-        footer {
-            border-top: 2px solid var(--red);
-            color: #555;
-            padding-top: 12px;
-            margin-top: 40px;
-        }
-    </style>
+.back-btn{
+    border:3px dashed var(--red);
+    color:var(--red);
+    padding:10px 28px;
+    border-radius:30px;
+    text-decoration:none;
+}
+.back-btn:hover{
+    background:var(--red);
+    color:white;
+}
+</style>
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <section class="page-header">
     <h1>{{ team.team_name }}</h1>
     <p>
         Department of {{ team.department }} · Ramitham 2025–26<br>
-        Dr. Janaki Ammal Campus, Palayad
+        Dr Janaki Ammal Campus, Palayad
     </p>
 </section>
 
-<!-- ================= SUMMARY ================= -->
-<div class="container summary-wrap">
+<div class="container mb-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="summary-card">
-                <div class="points">{{ team.total_points }}</div>
-                <div class="points-label">Total Points</div>
-                <span class="rank-badge">
-                    🏅 Overall Rank: {{ team.rank }}
-                </span>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="points">{{ total_points }}</div>
+                <div>Total Points</div>
 
-<!-- ================= EVENTS ================= -->
-<div class="container py-5">
-
-    {% for row in event_data %}
-        <div class="event-block">
-
-            <!-- EVENT HEADER -->
-            <div class="event-header">
-                <span>{{ row.event.name }}</span>
-                <div class="event-badges">
-                    <span>{{ row.event.event_type }}</span>
-                    <span>{{ row.event.stage_type }}</span>
+                <div class="rank-badge">
+                    <span class="rank-icon">
+                        {% if rank == 1 %}🥇
+                        {% elif rank == 2 %}🥈
+                        {% elif rank == 3 %}🥉
+                        {% else %}🏅{% endif %}
+                    </span>
+                    {{ rank }}{% if rank == 1 %}st{% elif rank == 2 %}nd{% elif rank == 3 %}rd{% else %}th{% endif %}
+                    Place
                 </div>
-            </div>
 
-            <!-- EVENT BODY -->
-            <div class="event-body">
-
-                <!-- PARTICIPANTS -->
-                <div class="participants-title">👥 Participants</div>
-                <ul class="participants-list">
-                    {% for name in row.participants %}
-                        <li>{{ name }}</li>
-                    {% endfor %}
-                </ul>
-
-                <!-- RESULT -->
-                {% if row.result %}
-                    <div class="result-box">
-                        {% if row.result.position == 1 %}
-                            <span class="medal">🥇</span>
-                        {% elif row.result.position == 2 %}
-                            <span class="medal">🥈</span>
-                        {% elif row.result.position == 3 %}
-                            <span class="medal">🥉</span>
-                        {% endif %}
-                        <strong>Position:</strong> {{ row.result.position }} <br>
-                        <strong>Points:</strong> {{ row.result.points }}
-                    </div>
-                {% else %}
-                    <p class="text-muted mb-0">
-                        Result not published
-                    </p>
-                {% endif %}
+                <div class="medal-count">
+                    <div class="medal-item"><span>🥇</span>{{ medal_count.gold }}</div>
+                    <div class="medal-item"><span>🥈</span>{{ medal_count.silver }}</div>
+                    <div class="medal-item"><span>🥉</span>{{ medal_count.bronze }}</div>
+                </div>
 
             </div>
         </div>
-    {% empty %}
-        <p class="text-center text-muted">
-            No participation records found.
-        </p>
-    {% endfor %}
-
-    <!-- BACK -->
-    <div class="text-center mt-4">
-        <a href="{% url 'public_index' %}" class="back-btn">
-            ⬅ Back to Leaderboard
-        </a>
     </div>
 </div>
 
-<!-- ================= FOOTER ================= -->
-<footer class="text-center small pb-3">
-    © Ramitham 2025–26 · Department Students’ Union<br>
-    Dr. Janaki Ammal Campus, Palayad
-</footer>
+<div class="container pb-5">
+{% for row in event_data %}
+<div class="event-block">
+    <div class="event-header">
+        <span>🎭 {{ row.event.name }}</span>
+        <div class="event-badges">
+            <span>{{ row.event.event_type }}</span>
+            <span>{{ row.event.stage_type }}</span>
+        </div>
+    </div>
+
+    <div class="event-body">
+        <strong>👥 Participants</strong>
+        <ul>
+            {% for name in row.participants %}
+                <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+
+        {% if row.result %}
+        <div class="result-box">
+            Position: {{ row.result.position }}<br>
+            Points: {{ row.result.points }}
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">Result not published</p>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<div class="text-center">
+    <a href="{% url 'public_index' %}" class="back-btn">
+        ⬅ Back to Leaderboard
+    </a>
+</div>
+</div>
 
 </body>
 </html>
