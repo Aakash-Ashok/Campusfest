@@ -44,7 +44,6 @@ body{
         drop-shadow(0 0 26px rgba(255,150,150,.35));
 }
 
-/* Responsive logo */
 @media(max-width:768px){
     .hero-logo img{ max-width:300px; }
 }
@@ -61,9 +60,7 @@ body{
 }
 
 @media(max-width:420px){
-    .hero-subtext{
-        font-size:.9rem;
-    }
+    .hero-subtext{ font-size:.9rem; }
 }
 
 /* ================= BOARD ================= */
@@ -94,10 +91,9 @@ body{
     width:100%;
 }
 
-.col-rank{width:90px}
-.col-team{width:40%}
-.col-dept{width:30%}
-.col-points{width:120px}
+.col-rank{width:70px}
+.col-team{width:auto}
+.col-points{width:90px}
 
 thead th{
     text-align:center;
@@ -110,16 +106,17 @@ tbody td{
     text-align:center;
     padding:18px 10px;
     font-size:1.2rem;
+    white-space:nowrap;
 }
 
 /* ================= RANK ================= */
 .rank-badge{
     display:inline-block;
-    width:40px;
-    font-size:1.6rem;
+    width:36px;
+    font-size:1.5rem;
 }
 
-/* Bounce top 3 only */
+/* Bounce top 3 */
 tbody tr:nth-child(1) .rank-badge,
 tbody tr:nth-child(2) .rank-badge,
 tbody tr:nth-child(3) .rank-badge{
@@ -159,7 +156,7 @@ tbody tr:hover::after{
     content:"🎨";
     position:absolute;
     right:12px;
-    font-size:1.5rem;
+    font-size:1.4rem;
 }
 
 /* ================= UPDATE ANIMATION ================= */
@@ -178,7 +175,41 @@ footer{
     padding:22px;
     font-size:1.05rem;
 }
+
+/* ================= MOBILE TUNING ONLY ================= */
+@media(max-width:768px){
+    thead th{
+        font-size:1.05rem;
+    }
+    tbody td{
+        font-size:1.05rem;
+        padding:14px 6px;
+    }
+    .points{
+        font-size:1.3rem;
+    }
+}
+
+@media(max-width:480px){
+    thead th{
+        font-size:.95rem;
+    }
+    tbody td{
+        font-size:.95rem;
+        padding:12px 4px;
+    }
+    .rank-badge{
+        font-size:1.3rem;
+    }
+    .points{
+        font-size:1.25rem;
+    }
+    .board{
+        padding:18px;
+    }
+}
 </style>
+
 </head>
 
 <body>
