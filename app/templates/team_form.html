@@ -1,12 +1,137 @@
 {% extends "base.html" %}
+{% block title %}Team Form{% endblock %}
+
 {% block content %}
+<div class="container-fluid team-form-wrap">
 
-<h2>Team Form</h2>
+    <!-- ================= HEADER ================= -->
+    <div class="team-form-header mb-4">
+        <h3 class="fw-semibold text-danger mb-1">👥 Team Details</h3>
+        <p class="text-muted mb-0">Create or update a team</p>
+    </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-</form>
+    <!-- ================= FORM CARD ================= -->
+    <div class="card team-form-card">
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- ================= FORM ERRORS ================= -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.errors }}
+                    </div>
+                {% endif %}
+
+                <!-- ================= FORM FIELDS ================= -->
+                <div class="team-form-fields">
+                    {{ form.as_p }}
+                </div>
+
+                <!-- ================= ACTIONS ================= -->
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% url 'team_list' %}" class="btn btn-outline-secondary btn-sm">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        Save Team
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.team-form-wrap{
+    background:#fafafa;
+    padding:14px;
+}
+
+/* HEADER */
+.team-form-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* CARD */
+.team-form-card{
+    background:#ffffff;
+    border-radius:18px;
+    border:1px solid #f1f1f1;
+    max-width:640px;
+}
+
+/* FORM */
+.team-form-fields p{
+    margin-bottom:18px;
+}
+
+.team-form-fields label{
+    font-weight:500;
+    margin-bottom:6px;
+    display:block;
+}
+
+/* INPUTS */
+.team-form-fields input,
+.team-form-fields select{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid var(--border);
+}
+
+.team-form-fields input:focus,
+.team-form-fields select:focus{
+    border-color:var(--red);
+    box-shadow:0 0 0 2px rgba(220,38,38,.12);
+    outline:none;
+}
+
+/* HELP TEXT */
+.team-form-fields .helptext{
+    font-size:.85rem;
+    color:#6b7280;
+}
+
+/* ERRORS */
+.team-form-fields .errorlist{
+    color:#b91c1c;
+    font-size:.85rem;
+    margin-top:4px;
+    padding-left:18px;
+}
+
+/* BUTTON */
+.btn-danger{
+    background:var(--red);
+    border:none;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px){
+    .team-form-card{
+        max-width:100%;
+    }
+
+    .team-form-header{
+        padding:16px;
+    }
+}
+</style>
 
 {% endblock %}

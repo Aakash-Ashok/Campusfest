@@ -2,50 +2,287 @@
 {% block title %}Team Details{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid team-page">
 
-    <!-- HEADER -->
-    <div class="mb-4">
-        <h3 class="fw-bold">{{ team.team_name }}</h3>
-        <p class="text-muted mb-0">Department of {{ team.department }}</p>
-    </div>
+    <!-- ================= TEAM BANNER ================= -->
+    <section class="team-banner">
+        <div class="team-banner-inner">
+            <h2 class="team-name">{{ team.team_name }}</h2>
+            <p class="team-dept">Department of {{ team.department }}</p>
+        </div>
+    </section>
 
-    <!-- EVENTS -->
-    {% for row in event_data %}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-            <strong>{{ row.event.name }}</strong>
-            <span class="badge bg-info ms-2">{{ row.event.event_type }}</span>
-            <span class="badge bg-success">{{ row.event.stage_type }}</span>
+    <!-- ================= QUICK STATS ================= -->
+    <section class="team-stats">
+
+        <div class="stat-box">
+            <span class="stat-label">Total Points</span>
+            <span class="stat-number text-danger">{{ total_points }}</span>
         </div>
 
-        <div class="card-body">
-            <!-- PARTICIPANTS -->
-            <h6>👥 Participants</h6>
-            <ul>
-                {% for name in row.participants %}
-                    <li>{{ name }}</li>
-                {% endfor %}
-            </ul>
-
-            <!-- RESULT -->
-            {% if row.result %}
-                <p class="mb-0">
-                    🏆 <strong>Position:</strong> {{ row.result.position }} <br>
-                    ⭐ <strong>Points:</strong> {{ row.result.points }}
-                </p>
-            {% else %}
-                <p class="text-muted mb-0">Result not published</p>
-            {% endif %}
+        <div class="stat-box">
+            <span class="stat-label">Overall Rank</span>
+            <span class="stat-number">{{ overall_place }}</span>
         </div>
-    </div>
-    {% empty %}
-        <p class="text-muted">No participation records found.</p>
-    {% endfor %}
 
-    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
-        ⬅ Back to Dashboard
-    </a>
+        <div class="stat-box">
+            <span class="stat-label">Medals</span>
+            <span class="stat-number medals">
+                🥇 {{ medal_count.gold }}
+                🥈 {{ medal_count.silver }}
+                🥉 {{ medal_count.bronze }}
+            </span>
+        </div>
+
+    </section>
+
+    <!-- ================= EVENT PARTICIPATION ================= -->
+    <section class="team-events">
+
+        {% for row in event_data %}
+            <article class="event-block">
+
+                <!-- EVENT HEADER -->
+                <div class="event-title">
+                    <h6>{{ row.event.name }}</h6>
+
+                    <div class="event-tags">
+                        <span class="tag blue">{{ row.event.event_type }}</span>
+                        <span class="tag green">{{ row.event.stage_type }}</span>
+                    </div>
+                </div>
+
+                <!-- EVENT CONTENT -->
+                <div class="event-content">
+
+                    <!-- PARTICIPANTS -->
+                    <div class="event-section">
+                        <span class="section-title">Participants</span>
+                        <ul class="participant-list">
+                            {% for name in row.participants %}
+                                <h5><li>{{ name }}</li></h5>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- RESULT -->
+                    <div class="event-section">
+                        <span class="section-title">Result</span>
+
+                        {% if row.result %}
+                            <div class="result-pill">
+                                🏆 Position {{ row.result.position }}
+                                &nbsp; • &nbsp;
+                                ⭐ {{ row.result.points }} points
+                            </div>
+                        {% else %}
+                            <span class="text-muted">Not published</span>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            </article>
+        {% empty %}
+            <p class="text-muted">No participation records found.</p>
+        {% endfor %}
+
+    </section>
+
+    <!-- ================= BACK ================= -->
+    <div class="mt-4">
+        <a href="{% url 'team_list' %}" class="btn btn-outline-secondary btn-sm">
+            ⬅ Back to Teams
+        </a>
+    </div>
 
 </div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.team-page{
+    background:#fafafa;
+    padding:16px;
+}
+
+/* TEAM BANNER */
+.team-banner{
+    background:linear-gradient(135deg, #fff1f2, #ffffff);
+    padding:32px 24px;
+    border-radius:22px;
+    margin-bottom:26px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+
+.team-banner-inner{
+    max-width:640px;
+}
+
+.team-name{
+    font-weight:700;
+    margin-bottom:6px;
+}
+
+.team-dept{
+    color:#6b7280;
+    margin:0;
+}
+
+/* STATS */
+.team-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+    margin-bottom:30px;
+}
+
+.stat-box{
+    background:#ffffff;
+    border:1px solid #f1f1f1;
+    border-radius:20px;
+    padding:20px;
+    text-align:center;
+}
+
+.stat-label{
+    font-size:.8rem;
+    color:#6b7280;
+    display:block;
+    margin-bottom:6px;
+}
+
+.stat-number{
+    font-size:1.55rem;
+    font-weight:700;
+}
+
+/* BIG MEDALS */
+.medals{
+    font-size:1.9rem;
+    letter-spacing:10px;
+    line-height:1.2;
+}
+
+/* EVENTS */
+.team-events{
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+}
+
+/* BIGGER PARTICIPATION CARD */
+.event-block{
+    background:#ffffff;
+    border:1px solid #ececec;
+    border-radius:22px;
+    overflow:hidden;
+}
+
+/* EVENT HEADER */
+.event-title{
+    padding:18px 22px;
+    background:#fff5f5;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.event-title h6{
+    margin:0;
+    font-weight:600;
+    font-size:1rem;
+}
+
+/* TAGS */
+.event-tags{
+    display:flex;
+    gap:8px;
+}
+
+.tag{
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:.75rem;
+    font-weight:500;
+}
+
+.tag.blue{
+    background:#e0f2fe;
+    color:#0369a1;
+}
+
+.tag.green{
+    background:#dcfce7;
+    color:#166534;
+}
+
+/* EVENT BODY */
+.event-content{
+    padding:22px 24px;
+    display:grid;
+    grid-template-columns:1.4fr 1fr;
+    gap:22px;
+}
+
+.event-section{
+    font-size:.95rem;
+}
+
+.section-title{
+    font-weight:600;
+    display:block;
+    margin-bottom:8px;
+}
+
+/* PARTICIPANTS */
+.participant-list{
+    padding-left:18px;
+    margin:0;
+}
+
+.participant-list li{
+    margin-bottom:4px;
+}
+
+/* RESULT */
+.result-pill{
+    background:var(--red-soft);
+    padding:12px 16px;
+    border-radius:14px;
+    font-weight:600;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px){
+
+    .team-stats{
+        grid-template-columns:1fr;
+    }
+
+    .event-content{
+        grid-template-columns:1fr;
+    }
+
+    .event-title{
+        align-items:flex-start;
+        gap:10px;
+    }
+
+    .stat-box{
+        text-align:left;
+    }
+}
+</style>
+
 {% endblock %}

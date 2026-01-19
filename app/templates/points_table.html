@@ -2,27 +2,143 @@
 {% block title %}Points Table{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">🏆 Points Table</h2>
+<div class="container-fluid points-wrap">
 
-<table class="table table-striped table-bordered">
-    <thead class="table-dark">
-        <tr>
-            <th>Rank</th>
-            <th>Team</th>
-            <th>Department</th>
-            <th>Total Points</th>
-        </tr>
-    </thead>
-    <tbody>
+    <!-- ================= HEADER ================= -->
+    <div class="points-header mb-4">
+        <h3 class="fw-semibold text-danger mb-1">🏆 Points Table</h3>
+        <p class="text-muted mb-0">Overall team standings</p>
+    </div>
+
+    <!-- ================= DESKTOP TABLE ================= -->
+    <div class="card points-card d-none d-md-block">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="points-thead">
+                    <tr>
+                        <th style="width:10%">Rank</th>
+                        <th>Team</th>
+                        <th>Department</th>
+                        <th class="text-end">Total Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for p in points %}
+                    <tr>
+                        <td class="fw-semibold">
+                            {% if forloop.counter == 1 %}🥇
+                            {% elif forloop.counter == 2 %}🥈
+                            {% elif forloop.counter == 3 %}🥉
+                            {% else %}{{ forloop.counter }}{% endif %}
+                        </td>
+
+                        <td class="fw-semibold">
+                            {{ p.team__team_name }}
+                        </td>
+
+                        <td>
+                            {{ p.team__department }}
+                        </td>
+
+                        <td class="text-end fw-bold text-danger">
+                            {{ p.total_points }}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            No data available
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ================= MOBILE CARD VIEW ================= -->
+    <div class="mobile-points d-md-none">
         {% for p in points %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ p.team__team_name }}</td>
-            <td>{{ p.team__department }}</td>
-            <td>{{ p.total_points }}</td>
-        </tr>
+            <div class="points-card-mobile">
+
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong>{{ p.team__team_name }}</strong>
+                    <span class="rank-badge">
+                        {% if forloop.counter == 1 %}🥇
+                        {% elif forloop.counter == 2 %}🥈
+                        {% elif forloop.counter == 3 %}🥉
+                        {% else %}#{{ forloop.counter }}{% endif %}
+                    </span>
+                </div>
+
+                <div class="text-muted small mb-2">
+                    {{ p.team__department }}
+                </div>
+
+                <div class="points-total">
+                    {{ p.total_points }} points
+                </div>
+
+            </div>
+        {% empty %}
+            <div class="text-center text-muted py-4">
+                No data available
+            </div>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
+
+</div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.points-wrap{
+    background:#fafafa;
+    padding:12px;
+}
+
+/* HEADER */
+.points-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* DESKTOP CARD */
+.points-card{
+    background:#ffffff;
+    border-radius:16px;
+    border:1px solid #f1f1f1;
+}
+
+/* TABLE HEAD */
+.points-thead{
+    background:#fff5f5;
+}
+
+/* MOBILE CARDS */
+.points-card-mobile{
+    background:#ffffff;
+    border:1px solid #f1f1f1;
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+}
+
+.rank-badge{
+    font-weight:600;
+}
+
+.points-total{
+    color:var(--red);
+    font-weight:700;
+}
+</style>
 
 {% endblock %}

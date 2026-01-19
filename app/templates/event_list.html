@@ -2,16 +2,23 @@
 {% block title %}Events{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid events-wrap">
 
-    <!-- HEADER + FILTER -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>🎉 Events</h3>
+    <!-- ================= HEADER + ACTIONS ================= -->
+    <div class="events-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="fw-semibold text-danger mb-1">🎉 Events</h3>
+            <p class="text-muted mb-0">Manage campus fest events</p>
+        </div>
 
-        <div class="d-flex gap-2">
-            <!-- FILTER -->
+        <div class="d-flex gap-2 align-items-center">
+
+            <!-- FILTERS -->
             <form method="get" class="d-flex gap-2">
-                <select name="stage" class="form-select form-select-sm"
+
+                <!-- STAGE FILTER -->
+                <select name="stage"
+                        class="form-select form-select-sm filter-select"
                         onchange="this.form.submit()">
                     <option value="">All Stages</option>
                     <option value="ON_STAGE"
@@ -23,67 +30,218 @@
                         Off Stage
                     </option>
                 </select>
+
+                <!-- TYPE FILTER (NEW) -->
+                <select name="mode"
+                        class="form-select form-select-sm filter-select"
+                        onchange="this.form.submit()">
+                    <option value="">All Types</option>
+                    <option value="SINGLE"
+                        {% if selected_mode == 'SINGLE' %}selected{% endif %}>
+                        Single
+                    </option>
+                    <option value="GROUP"
+                        {% if selected_mode == 'GROUP' %}selected{% endif %}>
+                        Group
+                    </option>
+                </select>
+
             </form>
 
             <!-- ADD EVENT -->
-            <a href="{% url 'event_create' %}" class="btn btn-success">
+            <a href="{% url 'event_create' %}" class="btn btn-danger btn-sm">
                 ➕ Add Event
             </a>
         </div>
     </div>
 
-    <!-- EVENTS TABLE -->
-    <div class="card shadow-sm">
-        <table class="table table-hover mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Stage</th>
-                    <th>Type</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for e in events %}
-                <tr>
-                    <td class="fw-semibold">{{ e.name }}</td>
-                    <td>
-                        {% if e.stage_type == 'ON_STAGE' %}
-                            <span class="badge bg-primary">On Stage</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Off Stage</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ e.event_type }}</td>
-                    <td class="text-end">
-                        <a href="{% url 'participation_add' %}?event={{ e.id }}"
-                           class="btn btn-sm btn-success">
-                            Add Participation
-                        </a>
-                        <a href="{% url 'event_edit' e.id %}"
-                           class="btn btn-sm btn-warning">
-                            Edit
-                        </a>
-                        <a href="{% url 'event_delete' e.id %}"
-                           class="btn btn-sm btn-danger">
-                            Delete
-                        </a>
-                        <a href="{% url 'event_result_pdf' e.id %}"
-                           class="btn btn-sm btn-primary">
-                            PDF
-                        </a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center text-muted py-3">
-                        No events found
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+    <!-- ================= EVENTS TABLE ================= -->
+    <div class="card events-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="events-thead">
+                    <tr>
+                        <th>Name</th>
+                        <th>Stage</th>
+                        <th>Type</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for e in events %}
+                    <tr>
+                        <td class="fw-semibold">{{ e.name }}</td>
+
+                        <td>
+                            {% if e.stage_type == 'ON_STAGE' %}
+                                <span class="badge badge-soft-red">On Stage</span>
+                            {% else %}
+                                <span class="badge badge-soft-gray">Off Stage</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if e.event_type == 'SINGLE' %}
+                                <span class="badge badge-soft-blue">Single</span>
+                            {% else %}
+                                <span class="badge badge-soft-purple">Group</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            <a href="{% url 'participation_add' %}?event={{ e.id }}"
+                               class="btn btn-sm btn-outline-success">
+                                Participation
+                            </a>
+
+                            <a href="{% url 'event_edit' e.id %}"
+                               class="btn btn-sm btn-outline-warning">
+                                Edit
+                            </a>
+
+                            <a href="{% url 'event_delete' e.id %}"
+                               class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </a>
+
+                            <a href="{% url 'event_result_pdf' e.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                PDF
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            No events found
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --gray-soft:#f3f4f6;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.events-wrap{
+    background:#fafafa;
+    padding:12px;
+}
+
+/* HEADER */
+.events-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* FILTER */
+.filter-select{
+    min-width:130px;
+}
+
+/* CARD */
+.events-card{
+    background:#ffffff;
+    border-radius:16px;
+    border:1px solid #f1f1f1;
+    overflow:hidden;
+}
+
+/* TABLE HEAD */
+.events-thead{
+    background:#fff5f5;
+}
+
+/* BADGES */
+.badge-soft-red{
+    background:#ffe4e6;
+    color:var(--red);
+    font-weight:500;
+}
+
+.badge-soft-gray{
+    background:var(--gray-soft);
+    color:#374151;
+    font-weight:500;
+}
+
+.badge-soft-blue{
+    background:#e0f2fe;
+    color:#0369a1;
+    font-weight:500;
+}
+
+.badge-soft-purple{
+    background:#f3e8ff;
+    color:#6b21a8;
+    font-weight:500;
+}
+
+/* BUTTONS */
+.btn-outline-danger,
+.btn-outline-warning,
+.btn-outline-success,
+.btn-outline-primary{
+    border-width:1.5px;
+}
+
+/* ================= MOBILE RESPONSIVE ================= */
+@media (max-width: 768px){
+
+    /* HEADER STACK */
+    .events-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+    }
+
+    /* FILTERS STACK */
+    .events-header form{
+        width:100%;
+        flex-direction:column;
+        gap:8px;
+    }
+
+    .filter-select{
+        width:100%;
+    }
+
+    /* ADD EVENT BUTTON */
+    .events-header .btn-danger{
+        width:100%;
+    }
+
+    /* TABLE SCROLL */
+    .table-responsive{
+        overflow-x:auto;
+    }
+
+    table{
+        min-width:720px;
+    }
+
+    /* ACTION BUTTONS */
+    td.text-end{
+        white-space:nowrap;
+    }
+
+    td.text-end .btn{
+        padding:4px 8px;
+        font-size:.75rem;
+    }
+}
+</style>
+
 {% endblock %}

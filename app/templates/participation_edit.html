@@ -2,112 +2,226 @@
 {% block title %}Edit Participation{% endblock %}
 
 {% block content %}
+<div class="container-fluid edit-participation-wrap">
 
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">✏ Edit Participation</h5>
-        <a href="{% url 'participation_list' %}" class="btn btn-light btn-sm">
+    <!-- ================= HEADER ================= -->
+    <div class="edit-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="fw-semibold text-danger mb-1">✏ Edit Participation</h3>
+            <p class="text-muted mb-0">Update participant details</p>
+        </div>
+
+        <a href="{% url 'participation_list' %}"
+           class="btn btn-outline-secondary btn-sm">
             ⬅ Back
         </a>
     </div>
 
-    <div class="card-body">
+    <!-- ================= CARD ================= -->
+    <div class="card edit-card">
+        <div class="card-body">
 
-        <!-- EVENT & TEAM INFO -->
-        <div class="mb-3">
-            <strong>Event:</strong> {{ event.name }}
-            <span class="badge bg-info ms-2">{{ event.event_type }}</span>
-            <span class="badge bg-success">{{ event.stage_type }}</span>
-        </div>
-
-        <div class="mb-4">
-            <strong>Team:</strong> {{ team.team_name }}
-            <small class="text-muted">({{ team.department }})</small>
-        </div>
-
-        <form method="post">
-            {% csrf_token %}
-
-            <!-- ========================= -->
-            <!-- ERROR DISPLAY (CRITICAL) -->
-            <!-- ========================= -->
-            {% if form and form.errors %}
-                <div class="alert alert-danger">
-                    {{ form.errors }}
+            <!-- ================= EVENT & TEAM INFO ================= -->
+            <div class="info-box mb-4">
+                <div class="mb-1">
+                    <strong>Event:</strong> {{ event.name }}
+                    <span class="badge badge-soft-blue ms-2">{{ event.event_type }}</span>
+                    <span class="badge badge-soft-green">{{ event.stage_type }}</span>
                 </div>
-            {% endif %}
 
-            {% if formset and formset.non_form_errors %}
-                <div class="alert alert-danger">
-                    {{ formset.non_form_errors }}
+                <div>
+                    <strong>Team:</strong> {{ team.team_name }}
+                    <small class="text-muted">({{ team.department }})</small>
                 </div>
-            {% endif %}
-
-            {% if formset and formset.errors %}
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        {% for err in formset.errors %}
-                            {% if err %}
-                                <li>{{ err }}</li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
-
-            <!-- ========================= -->
-            <!-- SINGLE EVENT -->
-            <!-- ========================= -->
-            {% if event.event_type == 'SINGLE' %}
-                {{ form.as_p }}
-
-            <!-- ========================= -->
-            <!-- GROUP EVENT -->
-            <!-- ========================= -->
-            {% else %}
-                {{ formset.management_form }}
-
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width:70%">Participant Name</th>
-                            <th style="width:15%" class="text-center">Remove</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for form in formset %}
-                        {{ form.id }}  <!-- 🔥 REQUIRED: identifies existing row -->
-                        <tr>
-                            <td>
-                                {{ form.participant_name }}
-                            </td>
-                            <td class="text-center">
-                                {% if form.DELETE %}
-                                    {{ form.DELETE }}
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-
-                <p class="text-muted small">
-                    Min {{ event.min_team_size }} /
-                    Max {{ event.max_team_size }} participants
-                </p>
-            {% endif %}
-
-            <div class="mt-4 d-flex justify-content-end gap-2">
-                <a href="{% url 'participation_list' %}" class="btn btn-secondary">
-                    Cancel
-                </a>
-                <button type="submit" class="btn btn-success">
-                    Save Changes
-                </button>
             </div>
-        </form>
 
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- ================= ERRORS ================= -->
+                {% if form and form.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.errors }}
+                    </div>
+                {% endif %}
+
+                {% if formset and formset.non_form_errors %}
+                    <div class="alert alert-danger">
+                        {{ formset.non_form_errors }}
+                    </div>
+                {% endif %}
+
+                {% if formset and formset.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            {% for err in formset.errors %}
+                                {% if err %}
+                                    <li>{{ err }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- ================= SINGLE EVENT ================= -->
+                {% if event.event_type == 'SINGLE' %}
+
+                    <div class="single-form">
+                        {{ form.as_p }}
+                    </div>
+
+                <!-- ================= GROUP EVENT ================= -->
+                {% else %}
+
+                    {{ formset.management_form }}
+
+                    <div class="table-responsive">
+                        <table class="table group-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Participant Name</th>
+                                    <th class="text-center" style="width:120px">
+                                        Remove
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for form in formset %}
+                                {{ form.id }}  <!-- REQUIRED -->
+                                <tr>
+                                    <td>{{ form.participant_name }}</td>
+                                    <td class="text-center">
+                                        {% if form.DELETE %}
+                                            {{ form.DELETE }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="text-muted small mt-2">
+                        Min {{ event.min_team_size }} /
+                        Max {{ event.max_team_size }} participants
+                    </p>
+
+                {% endif %}
+
+                <!-- ================= ACTIONS ================= -->
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <a href="{% url 'participation_list' %}"
+                       class="btn btn-outline-secondary btn-sm">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        Save Changes
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
     </div>
+
 </div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.edit-participation-wrap{
+    background:#fafafa;
+    padding:12px;
+}
+
+/* HEADER */
+.edit-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* CARD */
+.edit-card{
+    background:#ffffff;
+    border-radius:18px;
+    border:1px solid #f1f1f1;
+    max-width:900px;
+}
+
+/* INFO BOX */
+.info-box{
+    background:#fff5f5;
+    padding:14px 18px;
+    border-radius:12px;
+}
+
+/* BADGES */
+.badge-soft-blue{
+    background:#e0f2fe;
+    color:#0369a1;
+    font-weight:500;
+}
+
+.badge-soft-green{
+    background:#dcfce7;
+    color:#166534;
+    font-weight:500;
+}
+
+/* SINGLE FORM */
+.single-form p{
+    margin-bottom:16px;
+}
+
+/* GROUP TABLE */
+.group-table{
+    background:#ffffff;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.group-table thead{
+    background:#ffe4e6;
+}
+
+.group-table input{
+    width:100%;
+    padding:6px 8px;
+    border-radius:6px;
+    border:1px solid var(--border);
+}
+
+.group-table input:focus{
+    border-color:var(--red);
+    box-shadow:0 0 0 2px rgba(220,38,38,.12);
+    outline:none;
+}
+
+/* BUTTON */
+.btn-danger{
+    background:var(--red);
+    border:none;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+    .edit-card{
+        max-width:100%;
+    }
+
+    .edit-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+}
+</style>
 
 {% endblock %}

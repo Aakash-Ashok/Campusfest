@@ -1,12 +1,136 @@
 {% extends "base.html" %}
+{% block title %}Result Form{% endblock %}
+
 {% block content %}
+<div class="container-fluid result-wrap">
 
-<h2>Result Form</h2>
+    <!-- ================= HEADER ================= -->
+    <div class="result-header mb-4">
+        <h3 class="fw-semibold text-danger mb-1">🏆 Result Entry</h3>
+        <p class="text-muted mb-0">Assign position and points for an event</p>
+    </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-</form>
+    <!-- ================= FORM CARD ================= -->
+    <div class="card result-card">
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- ================= FORM ERRORS ================= -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {{ form.errors }}
+                    </div>
+                {% endif %}
+
+                <!-- ================= FORM FIELDS ================= -->
+                <div class="result-fields">
+                    {{ form.as_p }}
+                </div>
+
+                <!-- ================= ACTIONS ================= -->
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% url 'result_list' %}" class="btn btn-outline-secondary btn-sm">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        Save Result
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.result-wrap{
+    background:#fafafa;
+    padding:12px;
+}
+
+/* HEADER */
+.result-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* CARD */
+.result-card{
+    background:#ffffff;
+    border-radius:18px;
+    border:1px solid #f1f1f1;
+    max-width:720px;
+}
+
+/* FORM */
+.result-fields p{
+    margin-bottom:16px;
+}
+
+.result-fields label{
+    font-weight:500;
+    margin-bottom:6px;
+    display:block;
+}
+
+/* INPUTS */
+.result-fields input,
+.result-fields select{
+    width:100%;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--border);
+}
+
+.result-fields input:focus,
+.result-fields select:focus{
+    border-color:var(--red);
+    box-shadow:0 0 0 2px rgba(220,38,38,.12);
+    outline:none;
+}
+
+/* HELP TEXT */
+.result-fields .helptext{
+    font-size:.85rem;
+    color:#6b7280;
+}
+
+/* ERRORS */
+.result-fields .errorlist{
+    color:#b91c1c;
+    font-size:.85rem;
+    margin-top:4px;
+    padding-left:18px;
+}
+
+/* BUTTON */
+.btn-danger{
+    background:var(--red);
+    border:none;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px){
+    .result-card{
+        max-width:100%;
+    }
+
+    .result-header{
+        padding:16px;
+    }
+}
+</style>
 
 {% endblock %}

@@ -2,25 +2,39 @@
 {% block title %}Participation{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid participation-wrap">
 
     <!-- ================= HEADER ================= -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h3 class="fw-bold mb-1">🎭 Participation</h3>
-            <p class="text-muted mb-0">Event-wise team participation details</p>
-        </div>
+    <div class="participation-header mb-4">
+        <h3 class="fw-semibold text-danger mb-1">🎭 Participation</h3>
+        <p class="text-muted mb-2">Event-wise team participation details</p>
+
+        <!-- ================= TEAM FILTER ================= -->
+        <form method="get" class="d-flex gap-2 flex-wrap">
+            <select name="team"
+                    class="form-select form-select-sm"
+                    onchange="this.form.submit()"
+                    style="max-width:220px">
+                <option value="">All Teams</option>
+                {% for t in teams %}
+                    <option value="{{ t.id }}"
+                        {% if selected_team == t.id|stringformat:"s" %}selected{% endif %}>
+                        {{ t.team_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
     </div>
 
-    <!-- ================= TABLE CARD ================= -->
-    <div class="card shadow-sm border-0">
+    <!-- ================= DESKTOP TABLE ================= -->
+    <div class="card participation-card d-none d-md-block">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-dark">
+                <thead class="participation-thead">
                     <tr>
                         <th style="width:5%">#</th>
-                        <th style="width:25%">Event</th>
-                        <th style="width:20%">Team</th>
+                        <th style="width:28%">Event</th>
+                        <th style="width:22%">Team</th>
                         <th>Participants</th>
                         <th style="width:18%" class="text-center">Actions</th>
                     </tr>
@@ -28,38 +42,23 @@
                 <tbody>
                 {% for row in grouped_data %}
                     <tr>
-
-                        <!-- INDEX -->
                         <td class="fw-semibold">{{ forloop.counter }}</td>
 
                         <!-- EVENT -->
                         <td>
                             <div class="fw-semibold">{{ row.event.name }}</div>
-
-                            <div class="mt-1">
-
-                                <!-- EVENT TYPE BADGE -->
+                            <div class="mt-1 d-flex gap-1 flex-wrap">
                                 {% if row.event.event_type == 'SINGLE' %}
-                                    <span class="badge bg-primary">
-                                        Single
-                                    </span>
+                                    <span class="badge badge-soft-blue">Single</span>
                                 {% else %}
-                                    <span class="badge bg-purple">
-                                        Group
-                                    </span>
+                                    <span class="badge badge-soft-purple">Group</span>
                                 {% endif %}
 
-                                <!-- STAGE TYPE BADGE -->
                                 {% if row.event.stage_type == 'ON_STAGE' %}
-                                    <span class="badge bg-success">
-                                        On Stage
-                                    </span>
+                                    <span class="badge badge-soft-green">On Stage</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">
-                                        Off Stage
-                                    </span>
+                                    <span class="badge badge-soft-gray">Off Stage</span>
                                 {% endif %}
-
                             </div>
                         </td>
 
@@ -71,7 +70,7 @@
 
                         <!-- PARTICIPANTS -->
                         <td>
-                            <ul class="mb-0 ps-3">
+                            <ul class="participant-list mb-0">
                                 {% for name in row.participants %}
                                     <li>{{ name }}</li>
                                 {% endfor %}
@@ -85,7 +84,6 @@
                                    class="btn btn-sm btn-outline-warning">
                                     ✏ Edit
                                 </a>
-
                                 <a href="{% url 'participation_delete' row.event.id row.team.id %}"
                                    class="btn btn-sm btn-outline-danger"
                                    onclick="return confirm('Delete all participants for this team in this event?');">
@@ -93,7 +91,6 @@
                                 </a>
                             </div>
                         </td>
-
                     </tr>
                 {% empty %}
                     <tr>
@@ -107,13 +104,182 @@
         </div>
     </div>
 
+    <!-- ================= MOBILE CARD VIEW ================= -->
+    <div class="mobile-cards d-md-none">
+    {% for row in grouped_data %}
+        <div class="participation-card-mobile">
+
+            <div class="fw-semibold mb-1">{{ row.event.name }}</div>
+
+            <div class="d-flex gap-1 flex-wrap mb-2">
+                {% if row.event.event_type == 'SINGLE' %}
+                    <span class="badge badge-soft-blue">Single</span>
+                {% else %}
+                    <span class="badge badge-soft-purple">Group</span>
+                {% endif %}
+
+                {% if row.event.stage_type == 'ON_STAGE' %}
+                    <span class="badge badge-soft-green">On Stage</span>
+                {% else %}
+                    <span class="badge badge-soft-gray">Off Stage</span>
+                {% endif %}
+            </div>
+
+            <div class="mb-2">
+                <strong>{{ row.team.team_name }}</strong><br>
+                <small class="text-muted">{{ row.team.department }}</small>
+            </div>
+
+            <!-- PARTICIPANTS -->
+            <div class="participants-mobile">
+                <ul id="plist-{{ forloop.counter }}" class="collapsed">
+                    {% for name in row.participants %}
+                        <li>{{ name }}</li>
+                    {% endfor %}
+                </ul>
+
+                {% if row.participants|length > 3 %}
+                <button type="button"
+                        class="show-more-btn"
+                        onclick="toggleParticipants('plist-{{ forloop.counter }}', this)">
+                    Show more
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="d-flex gap-2 mt-3">
+                <a href="{% url 'participation_edit' row.event.id row.team.id %}"
+                   class="btn btn-outline-warning btn-sm w-100">
+                    ✏ Edit
+                </a>
+
+                <a href="{% url 'participation_delete' row.event.id row.team.id %}"
+                   class="btn btn-outline-danger btn-sm w-100"
+                   onclick="return confirm('Delete all participants for this team in this event?');">
+                    🗑 Delete
+                </a>
+            </div>
+
+        </div>
+    {% empty %}
+        <div class="text-center text-muted py-4">
+            No participation records found
+        </div>
+    {% endfor %}
+    </div>
+
 </div>
 
-<!-- ================= CUSTOM STYLES ================= -->
+<!-- ================= STYLES ================= -->
 <style>
-.bg-purple {
-    background-color: #6f42c1; /* Purple for GROUP events */
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --gray-soft:#f3f4f6;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.participation-wrap{
+    background:#fafafa;
+    padding:12px;
+}
+
+/* HEADER */
+.participation-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* DESKTOP CARD */
+.participation-card{
+    background:#ffffff;
+    border-radius:16px;
+    border:1px solid #f1f1f1;
+}
+
+/* TABLE */
+.participation-thead{
+    background:#fff5f5;
+}
+
+.participant-list{
+    padding-left:18px;
+    margin:0;
+}
+
+/* BADGES */
+.badge-soft-blue{
+    background:#e0f2fe;
+    color:#0369a1;
+    font-weight:500;
+}
+
+.badge-soft-purple{
+    background:#f3e8ff;
+    color:#6b21a8;
+    font-weight:500;
+}
+
+.badge-soft-green{
+    background:#dcfce7;
+    color:#166534;
+    font-weight:500;
+}
+
+.badge-soft-gray{
+    background:var(--gray-soft);
+    color:#374151;
+    font-weight:500;
+}
+
+/* ================= MOBILE CARDS ================= */
+.participation-card-mobile{
+    background:#ffffff;
+    border:1px solid #f1f1f1;
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+}
+
+/* PARTICIPANTS COLLAPSE */
+.participants-mobile ul{
+    padding-left:18px;
+    margin-bottom:6px;
+}
+
+.participants-mobile ul.collapsed li:nth-child(n+4){
+    display:none;
+}
+
+.show-more-btn{
+    background:none;
+    border:none;
+    color:var(--red);
+    font-size:.85rem;
+    padding:0;
+    cursor:pointer;
+}
+
+/* FILTER MOBILE */
+@media(max-width:768px){
+    .participation-header select{
+        width:100%;
+    }
 }
 </style>
+
+<!-- ================= JS ================= -->
+<script>
+function toggleParticipants(id, btn){
+    const list = document.getElementById(id);
+    list.classList.toggle('collapsed');
+    btn.textContent = list.classList.contains('collapsed')
+        ? 'Show more'
+        : 'Show less';
+}
+</script>
 
 {% endblock %}

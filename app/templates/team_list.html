@@ -2,42 +2,169 @@
 {% block title %}Teams{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid teams-wrap">
 
-    <div class="d-flex justify-content-between mb-3">
-        <h3>👥 Teams</h3>
-        <a href="{% url 'team_create' %}" class="btn btn-success">➕ Add Team</a>
+    <!-- ================= HEADER ================= -->
+    <div class="teams-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="fw-semibold text-danger mb-1">👥 Teams</h3>
+            <p class="text-muted mb-0">Registered teams and departments</p>
+        </div>
+
+        <a href="{% url 'team_create' %}" class="btn btn-danger btn-sm">
+            ➕ Add Team
+        </a>
     </div>
 
-    <div class="card shadow-sm">
-        <table class="table table-hover mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>Team</th>
-                    <th>Department</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for t in teams %}
-                <tr>
-                    <td>{{ t.team_name }}</td>
-                    <td>{{ t.department }}</td>
-                    <td class="text-end">
-                        <a href="{% url 'team_edit' t.id %}" class="btn btn-sm btn-warning">Edit</a>
-                        <a href="{% url 'team_delete' t.id %}" class="btn btn-sm btn-danger">Delete</a>
-                        <a href="{% url 'team_participation_pdf' t.id %}" class="btn btn-sm btn-primary">PDF</a>
-                    </td>
+    <!-- ================= DESKTOP TABLE ================= -->
+    <div class="card teams-card d-none d-md-block">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="teams-thead">
+                    <tr>
+                        <th>Team</th>
+                        <th>Department</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for t in teams %}
+                    <tr>
+                        <!-- TEAM NAME CLICKABLE -->
+                        <td class="fw-semibold">
+                            <a href="{% url 'team_detail' t.id %}"
+                               class="team-link">
+                                {{ t.team_name }}
+                            </a>
+                        </td>
 
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="3" class="text-center text-muted">No teams found</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                        <td>{{ t.department }}</td>
+
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                <a href="{% url 'team_edit' t.id %}"
+                                   class="btn btn-sm btn-outline-warning">
+                                    ✏ Edit
+                                </a>
+
+                                <a href="{% url 'team_delete' t.id %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    🗑 Delete
+                                </a>
+
+                                <a href="{% url 'team_participation_pdf' t.id %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    📄 PDF
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">
+                            No teams found
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ================= MOBILE CARD VIEW ================= -->
+    <div class="mobile-teams d-md-none">
+        {% for t in teams %}
+            <div class="team-card-mobile">
+
+                <div class="fw-semibold mb-1">
+                    <a href="{% url 'team_detail' t.id %}" class="team-link">
+                        {{ t.team_name }}
+                    </a>
+                </div>
+
+                <div class="text-muted small mb-3">
+                    {{ t.department }}
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'team_edit' t.id %}"
+                       class="btn btn-outline-warning btn-sm w-100">
+                        ✏ Edit
+                    </a>
+
+                    <a href="{% url 'team_delete' t.id %}"
+                       class="btn btn-outline-danger btn-sm w-100">
+                        🗑 Delete
+                    </a>
+                </div>
+
+                <a href="{% url 'team_participation_pdf' t.id %}"
+                   class="btn btn-outline-primary btn-sm w-100 mt-2">
+                    📄 Participation PDF
+                </a>
+
+            </div>
+        {% empty %}
+            <div class="text-center text-muted py-4">
+                No teams found
+            </div>
+        {% endfor %}
     </div>
 
 </div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.teams-wrap{
+    background:#fafafa;
+    padding:12px;
+}
+
+/* HEADER */
+.teams-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* DESKTOP CARD */
+.teams-card{
+    background:#ffffff;
+    border-radius:16px;
+    border:1px solid #f1f1f1;
+}
+
+/* TABLE HEAD */
+.teams-thead{
+    background:#fff5f5;
+}
+
+/* TEAM LINK */
+.team-link{
+    color:#111827;
+    text-decoration:none;
+}
+
+.team-link:hover{
+    color:var(--red);
+    text-decoration:underline;
+}
+
+/* ================= MOBILE CARDS ================= */
+.team-card-mobile{
+    background:#ffffff;
+    border:1px solid #f1f1f1;
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+}
+</style>
+
 {% endblock %}

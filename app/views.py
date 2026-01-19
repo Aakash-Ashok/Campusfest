@@ -94,15 +94,20 @@ def admin_dashboard(request):
 @login_required
 def event_list(request):
     stage = request.GET.get('stage')
+    mode = request.GET.get('mode')   # NEW
 
     events = Event.objects.all().order_by('stage_type', 'name')
 
     if stage in ['ON_STAGE', 'OFF_STAGE']:
         events = events.filter(stage_type=stage)
 
+    if mode in ['SINGLE', 'GROUP']:
+        events = events.filter(event_type=mode)
+
     return render(request, 'event_list.html', {
         'events': events,
-        'selected_stage': stage
+        'selected_stage': stage,
+        'selected_mode': mode,   # NEW
     })
 
 
@@ -231,15 +236,77 @@ def team_detail(request, team_id):
     })
 
 
+def team_detail(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
 
+    # ================= TOTAL POINTS =================
+    total_points = (
+        Result.objects
+        .filter(team=team)
+        .aggregate(tp=Coalesce(Sum('points'), 0))
+        ['tp']
+    )
+
+    # ================= RANK CALCULATION =================
+    teams = (
+        Team.objects
+        .annotate(
+            total_points=Coalesce(Sum('results__points'), 0)
+        )
+        .order_by('-total_points', 'team_name')
+    )
+
+    team_rank = 1
+    for idx, t in enumerate(teams, start=1):
+        if t.id == team.id:
+            team_rank = idx
+            break
+
+    # ================= MEDAL COUNTS =================
+    medal_count = Result.objects.filter(team=team).aggregate(
+        gold=Coalesce(Count('id', filter=Q(position=1)), 0),
+        silver=Coalesce(Count('id', filter=Q(position=2)), 0),
+        bronze=Coalesce(Count('id', filter=Q(position=3)), 0),
+    )
+
+    # ================= EVENT DATA =================
+    event_data = []
+    results = Result.objects.filter(team=team).select_related('event')
+
+    for r in results:
+        participants = list(
+            team.participations
+            .filter(event=r.event)
+            .values_list('participant_name', flat=True)
+        )
+
+        event_data.append({
+            'event': r.event,
+            'participants': participants,
+            'result': r
+        })
+
+    return render(request, 'team_detail.html', {
+        'team': team,
+        'total_points': total_points,
+        'rank': team_rank,
+        'overall_place': ordinal(team_rank),
+        'medal_count': medal_count,
+        'event_data': event_data
+    })
 
 from collections import defaultdict
 
 @login_required
 def participation_list(request):
+    team_id = request.GET.get('team')
+
     participations = Participation.objects.select_related(
         'event', 'team'
     ).order_by('event__name', 'team__team_name')
+
+    if team_id:
+        participations = participations.filter(team_id=team_id)
 
     grouped = defaultdict(list)
 
@@ -256,10 +323,16 @@ def participation_list(request):
         for (event, team), names in grouped.items()
     ]
 
+    teams = Team.objects.all().order_by('team_name')
+
     return render(
         request,
         'participation_list.html',
-        {'grouped_data': grouped_data}
+        {
+            'grouped_data': grouped_data,
+            'teams': teams,
+            'selected_team': team_id,
+        }
     )
 
 
@@ -976,95 +1049,108 @@ from reportlab.pdfgen import canvas
 from .models import Result, Participation
 
 \
-def _draw_certificate(p, width, height, name, team, event, position, points):
+import io
+import zipfile
+import os
+
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.utils.timezone import now
+from django.conf import settings
+
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
+
+from .models import Result, Participation
+from django.contrib.staticfiles import finders
+
+from reportlab.lib.colors import HexColor, black
+from django.contrib.staticfiles import finders
+from reportlab.lib.utils import ImageReader
+
+def _draw_certificate(
+    p, width, height, *,
+    name, team, event, position, points, is_winner=True
+):
     """
-    Professional, institutional certificate design
+    Draw certificate using uploaded background image
     """
 
-    PRIMARY = HexColor("#1f2937")
-    ACCENT = HexColor("#2563eb")
-    LIGHT = HexColor("#f8fafc")
-    MUTED = HexColor("#6b7280")
+    # ---------------- COLORS ----------------
+    TITLE = HexColor("#000000")
+    MUTED = HexColor("#444444")
 
-    # ================= LIGHT GRADIENT HEADER =================
-    for i in range(40):
-        shade = 0.96 - (i * 0.003)
-        p.setFillColorRGB(shade, shade + 0.01, 1)
-        p.rect(0, height - (i * 10), width, 10, fill=1, stroke=0)
+    # ---------------- BACKGROUND IMAGE ----------------
+    bg_path = os.path.join(
+        settings.BASE_DIR,
+        "static",
+        "certificates",
+        "certificate_bg.png"
+    )
 
-    # ================= BORDER =================
-    p.setStrokeColor(PRIMARY)
-    p.setLineWidth(3)
-    p.rect(40, 40, width - 80, height - 80)
+    p.drawImage(
+        ImageReader(bg_path),
+        0, 0,
+        width=width,
+        height=height,
+        preserveAspectRatio=True,
+        mask="auto"
+    )
 
-    # ================= TITLE =================
-    p.setFillColor(PRIMARY)
-    p.setFont("Times-Bold", 30)
-    p.drawCentredString(width / 2, height - 160, "Certificate of Achievement")
+    # ---------------- TITLE ----------------
+    p.setFillColor(TITLE)
+    p.setFont("Helvetica-Bold", 36)
 
-    p.setFont("Times-Italic", 13)
+    title_text = "CERTIFICATE OF ACHIEVEMENT" if is_winner else "CERTIFICATE OF APPRECIATION"
+    p.drawCentredString(width / 2, height - 130, title_text)
+
+    # ---------------- NAME ----------------
+    p.setFont("Helvetica-Bold", 22)
+    p.drawCentredString(width / 2, height - 200, name)
+
+    # ---------------- PRESENTED TO ----------------
+    p.setFont("Helvetica", 14)
     p.setFillColor(MUTED)
     p.drawCentredString(
         width / 2,
-        height - 195,
-        "This certificate is proudly presented to"
-    )
-
-    # ================= NAME =================
-    p.setFont("Times-Bold", 26)
-    p.setFillColor(colors.black)
-    p.drawCentredString(width / 2, height - 250, name)
-
-    # ================= TEAM INFO =================
-    p.setFont("Times-Roman", 14)
-    p.setFillColor(colors.black)
-    p.drawCentredString(
-        width / 2,
-        height - 290,
+        height - 235,
         f"Team {team.team_name} — Department of {team.department}"
     )
 
-    # ================= ACHIEVEMENT =================
-    p.setFont("Times-Roman", 15)
-    p.drawCentredString(
-        width / 2,
-        height - 330,
-        f"For securing {position} Position"
-    )
+    # ---------------- EVENT INFO ----------------
+    p.setFont("Helvetica-Bold", 15)
+    p.setFillColor(black)
+    p.drawCentredString(width / 2, height - 285, event.name)
 
-    p.setFont("Times-Bold", 17)
-    p.drawCentredString(
-        width / 2,
-        height - 360,
-        f"in the event “{event.name}”"
-    )
+    p.setFont("Helvetica", 13)
+    p.drawCentredString(width / 2, height - 315, f"Position : {position}")
+    p.drawCentredString(width / 2, height - 340, f"Points : {points}")
 
-    p.setFont("Times-Italic", 13)
+    # ---------------- DESCRIPTION ----------------
+    p.setFont("Helvetica-Oblique", 11)
     p.setFillColor(MUTED)
     p.drawCentredString(
         width / 2,
-        height - 395,
-        f"Awarded with {points} points"
+        height - 390,
+        "For achievements and participation in Ramitham 2025–26"
+    )
+    p.drawCentredString(
+        width / 2,
+        height - 410,
+        "Held on 27, 28 & 29 January 2026 by Department Students’ Union"
     )
 
-    # ================= SIGNATURES =================
-    p.setFillColor(colors.black)
-    p.setFont("Times-Roman", 12)
-
-    p.drawString(90, 140, "________________________")
-    p.drawString(105, 120, "Event Coordinator")
-
-    p.drawString(width - 290, 140, "________________________")
-    p.drawString(width - 260, 120, "Principal / Head")
-
-    # ================= FOOTER =================
-    p.setFont("Times-Italic", 10)
-    p.setFillColor(MUTED)
+    # ---------------- FOOTER DATE ----------------
+    p.setFont("Helvetica-Oblique", 9)
     p.drawCentredString(
         width / 2,
         90,
-        f"Issued on {now().strftime('%d %B %Y')} | Campus Fest"
+        f"Issued on {now().strftime('%d %B %Y')}"
     )
+
+
 
 
 @login_required
@@ -1081,35 +1167,37 @@ def generate_winner_certificate(request, result_id):
         team=team
     )
 
-    # =====================================================
-    # 🔹 CASE 1: SINGLE EVENT → ONE PDF
-    # =====================================================
-    if event.event_type == 'SINGLE':
+    # ================= SINGLE EVENT =================
+    if event.event_type == "SINGLE":
         participant = participants.first()
 
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = (
-            f'attachment; filename="{participant.participant_name}_{event.name}_Certificate.pdf"'
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = (
+            f'attachment; filename="{participant.participant_name}_{event.name}.pdf"'
         )
 
         p = canvas.Canvas(response, pagesize=A4)
         width, height = A4
 
         _draw_certificate(
-            p, width, height,
-            participant.participant_name,
-            team, event, position, points
+            p,
+            width,
+            height,
+            name=participant.participant_name,
+            team=team,
+            event=event,
+            position=position,
+            points=points,
+            is_winner=True
         )
 
         p.showPage()
         p.save()
         return response
 
-    # =====================================================
-    # 🔹 CASE 2: GROUP EVENT → MULTIPLE PDFs (ZIP)
-    # =====================================================
+    # ================= GROUP EVENT =================
     zip_buffer = io.BytesIO()
-    zip_file = zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED)
+    zip_file = zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED)
 
     for member in participants:
         pdf_buffer = io.BytesIO()
@@ -1117,28 +1205,33 @@ def generate_winner_certificate(request, result_id):
         width, height = A4
 
         _draw_certificate(
-            p, width, height,
-            member.participant_name,
-            team, event, position, points
+            p,
+            width,
+            height,
+            name=member.participant_name,
+            team=team,
+            event=event,
+            position=position,
+            points=points,
+            is_winner=True
         )
 
         p.showPage()
         p.save()
-        pdf_buffer.seek(0)
 
-        filename = f"{member.participant_name}_{event.name}_Certificate.pdf"
+        pdf_buffer.seek(0)
+        filename = f"{member.participant_name}_{event.name}.pdf"
         zip_file.writestr(filename, pdf_buffer.read())
 
     zip_file.close()
     zip_buffer.seek(0)
 
-    response = HttpResponse(zip_buffer, content_type='application/zip')
-    response['Content-Disposition'] = (
+    response = HttpResponse(zip_buffer, content_type="application/zip")
+    response["Content-Disposition"] = (
         f'attachment; filename="{team.team_name}_{event.name}_Certificates.zip"'
     )
 
     return response
-
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,66 +20,50 @@ body{
     font-family:'Patrick Hand', cursive;
     background: linear-gradient(180deg, #ffeaea, #ffffff);
     overflow-x:hidden;
-    position:relative;
-}
-
-/* ================= FLOATING KERALA DOODLES ================= */
-.doodle{
-    position:fixed;
-    width:140px;
-    opacity:.35;
-    z-index:-1;
-    animation:float 10s ease-in-out infinite;
-}
-.d1{top:90px;left:40px}
-.d2{top:120px;right:60px;animation-delay:2s}
-.d3{bottom:120px;left:50px;animation-delay:4s}
-.d4{bottom:90px;right:70px;animation-delay:6s}
-
-@keyframes float{
-    0%{transform:translateY(0) rotate(0deg)}
-    50%{transform:translateY(-22px) rotate(2deg)}
-    100%{transform:translateY(0) rotate(0deg)}
 }
 
 /* ================= HERO ================= */
 .hero{
     text-align:center;
-    padding:60px 15px 40px;
-    position:relative;
+    padding:48px 15px 30px;
 }
 
-.hero h1{
-    font-size:3.4rem;
-    font-weight:800;
-    color:var(--red);
+/* ================= LOGO ================= */
+.hero-logo{
+    display:flex;
+    justify-content:center;
+    margin-bottom:4px;
 }
 
-/* brush underline animation */
-.hero::after{
-    content:"";
-    display:block;
-    width:220px;
-    height:10px;
-    margin:14px auto 0;
-    background:linear-gradient(90deg, transparent, var(--red), transparent);
-    border-radius:20px;
-    animation:brush 2s infinite alternate;
-}
-@keyframes brush{
-    from{transform:scaleX(0.7)}
-    to{transform:scaleX(1)}
+.hero-logo img{
+    max-width:420px;
+    width:100%;
+    height:auto;
+    filter:
+        drop-shadow(0 10px 18px rgba(255,0,0,.25))
+        drop-shadow(0 0 26px rgba(255,150,150,.35));
 }
 
-.hero h1 span{
-    background:var(--red);
-    color:white;
-    padding:6px 18px;
-    border-radius:22px;
+/* Responsive logo */
+@media(max-width:768px){
+    .hero-logo img{ max-width:300px; }
+}
+@media(max-width:420px){
+    .hero-logo img{ max-width:240px; }
 }
 
-.hero p{
-    font-size:1.2rem;
+/* ================= SUBTEXT ================= */
+.hero-subtext{
+    margin-top:4px;
+    font-size:1rem;
+    color:#444;
+    text-align:center;
+}
+
+@media(max-width:420px){
+    .hero-subtext{
+        font-size:.9rem;
+    }
 }
 
 /* ================= BOARD ================= */
@@ -91,17 +76,16 @@ body{
     position:relative;
 }
 
-/* sticker labels */
+/* Sticker labels */
 .sticker{
     position:absolute;
     background:var(--red);
     color:white;
     padding:6px 14px;
     border-radius:18px;
-    font-size:0.95rem;
-    transform:rotate(-8deg);
+    font-size:.95rem;
 }
-.st1{top:-14px;left:20px}
+.st1{top:-14px;left:20px;transform:rotate(-8deg)}
 .st2{top:-14px;right:20px;transform:rotate(6deg)}
 
 /* ================= TABLE ================= */
@@ -135,7 +119,7 @@ tbody td{
     font-size:1.6rem;
 }
 
-/* bounce top 3 */
+/* Bounce top 3 only */
 tbody tr:nth-child(1) .rank-badge,
 tbody tr:nth-child(2) .rank-badge,
 tbody tr:nth-child(3) .rank-badge{
@@ -163,7 +147,7 @@ tbody tr:nth-child(3) .rank-badge{
     color:var(--red);
 }
 
-/* ================= ROW PAINT SPLASH ================= */
+/* ================= ROW EFFECT ================= */
 tbody tr{
     transition:.25s;
     position:relative;
@@ -176,14 +160,9 @@ tbody tr:hover::after{
     position:absolute;
     right:12px;
     font-size:1.5rem;
-    animation:splash .4s ease;
-}
-@keyframes splash{
-    from{transform:scale(0)}
-    to{transform:scale(1)}
 }
 
-/* ================= UPDATE FUN ================= */
+/* ================= UPDATE ANIMATION ================= */
 .row-updated{
     animation:pop .6s ease;
 }
@@ -206,16 +185,23 @@ footer{
 
 <!-- ================= HERO ================= -->
 <section class="hero">
-    <h1>RAMITHAM <span>2025–26</span></h1>
-    <p>Inter-Department Art & Cultural Fest</p>
-    <p>Department Students’ Union · Dr Janaki Ammal Campus</p>
+
+    <div class="hero-logo">
+        <img src="{% static 'images/ramitham_logo-removebg-preview.png' %}"
+             alt="Ramitham 2025–26 Logo">
+    </div>
+
+    <div class="hero-subtext">
+        Department Students’ Union · Dr Janaki Ammal Campus <strong>2025–26</strong>
+    </div>
+
 </section>
 
 <!-- ================= LEADERBOARD ================= -->
 <div class="container pb-5">
 <div class="board">
 
-<div class="sticker st1">🎭 ARTS</div>
+<div class="sticker st1">🎭 Campus</div>
 <div class="sticker st2">🎉 FEST</div>
 
 <div class="table-responsive" id="leaderboard-container">
@@ -239,7 +225,7 @@ footer{
 
 <tbody>
 {% for p in points %}
-<tr data-team="{{ p.id }}" data-points="{{ p.total_points }}">
+<tr>
 <td>
 <span class="rank-badge">
 {% if forloop.counter == 1 %}🥇

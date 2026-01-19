@@ -9,95 +9,158 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #f5f7fb;
-            overflow-x: hidden;
-        }
+:root{
+    --red:#e11d48;
+    --red-soft:#ffe4e6;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --bg:#fafafa;
+}
 
-        /* ================= SIDEBAR ================= */
-        .sidebar {
-            width: 240px;
-            min-height: 100vh;
-            background: #111827;
-            color: #fff;
-            position: fixed;
-            top: 0;
-            left: 0;
-            transition: all .25s ease;
-            z-index: 1000;
-        }
+body{
+    background:var(--bg);
+    font-family:'Segoe UI',sans-serif;
+    color:var(--text);
+    overflow-x:hidden;
+}
 
-        .sidebar a {
-            color: #d1d5db;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            border-radius: 6px;
-            white-space: nowrap;
-        }
+/* ================= SIDEBAR ================= */
+.sidebar{
+    width:240px;
+    min-height:100vh;
+    background:#ffffff;
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+    transition:.25s ease;
+    border-right:1px solid var(--border);
+}
 
-        .sidebar a:hover {
-            background: #1f2937;
-            color: #fff;
-        }
+.sidebar h5{
+    font-weight:600;
+    color:var(--red);
+}
 
-        /* ================= CONTENT ================= */
-        .content {
-            margin-left: 240px;
-            padding: 24px;
-            transition: margin-left .25s ease;
-        }
+/* Menu items */
+.sidebar a{
+    color:var(--text);
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 16px;
+    border-radius:6px;
+    margin-bottom:4px;
+    font-weight:500;
+    position:relative;
+}
 
-        /* ================= DESKTOP COLLAPSE ================= */
-        .sidebar.collapsed {
-            width: 70px;
-        }
+/* Red accent strip */
+.sidebar a::before{
+    content:'';
+    position:absolute;
+    left:0;
+    top:6px;
+    bottom:6px;
+    width:3px;
+    background:transparent;
+    border-radius:3px;
+}
 
-        .sidebar.collapsed span {
-            display: none;
-        }
+.sidebar a:hover{
+    background:var(--red-soft);
+    color:var(--red);
+}
 
-        .sidebar.collapsed ~ .content {
-            margin-left: 70px;
-        }
+.sidebar a:hover::before{
+    background:var(--red);
+}
 
-        /* ================= MOBILE ================= */
-        @media (max-width: 768px) {
-            .sidebar {
-                left: -240px;
-            }
+/* Buttons */
+.sidebar a.btn{
+    border:1px solid var(--red);
+    color:var(--red);
+}
 
-            .sidebar.mobile-open {
-                left: 0;
-            }
+.sidebar a.btn:hover{
+    background:var(--red);
+    color:#fff;
+}
 
-            .content {
-                margin-left: 0;
-                padding: 16px;
-            }
+/* ================= CONTENT ================= */
+.content{
+    margin-left:240px;
+    padding:28px;
+    transition:.25s;
+    background:#ffffff;
+    min-height:100vh;
+}
 
-            .overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,.4);
-                z-index: 999;
-            }
+/* ================= DESKTOP COLLAPSE ================= */
+.sidebar.collapsed{
+    width:70px;
+}
 
-            .overlay.show {
-                display: block;
-            }
-        }
+.sidebar.collapsed span{
+    display:none;
+}
 
-        .toggle-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            color: #9ca3af;
-        }
-    </style>
+.sidebar.collapsed ~ .content{
+    margin-left:70px;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px){
+    .sidebar{
+        left:-240px;
+    }
+
+    .sidebar.mobile-open{
+        left:0;
+    }
+
+    .content{
+        margin-left:0;
+        padding:18px;
+    }
+
+    .overlay{
+        display:none;
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.35);
+        z-index:999;
+    }
+
+    .overlay.show{
+        display:block;
+    }
+}
+
+/* ================= BUTTONS ================= */
+.toggle-btn{
+    background:var(--red);
+    border:none;
+    color:#fff;
+    font-size:18px;
+    padding:6px 10px;
+    border-radius:6px;
+}
+
+.toggle-btn:hover{
+    opacity:.9;
+}
+
+/* ================= ALERT ================= */
+.alert{
+    border-radius:8px;
+}
+</style>
+
+
+
 </head>
 
 <body>
@@ -111,10 +174,7 @@
         <h5 class="mb-0">🎭 <span>Campus Fest</span></h5>
 
         <!-- DESKTOP TOGGLE -->
-        <button class="toggle-btn d-none d-md-inline"
-                onclick="toggleSidebar()">
-            ☰
-        </button>
+        <button class="toggle-btn d-none d-md-inline" onclick="toggleSidebar()">☰</button>
     </div>
 
     <a href="{% url 'admin_dashboard' %}">🏠 <span>Dashboard</span></a>
@@ -122,11 +182,12 @@
     <a href="{% url 'team_list' %}">👥 <span>Teams</span></a>
     <a href="{% url 'participation_list' %}">🧾 <span>Participation</span></a>
     <a href="{% url 'result_list' %}">🏆 <span>Results</span></a>
-    <a href="{% url 'fest_full_report' %}" class="btn btn-outline-dark btn-sm">
-    📄 Download Full Fest Report
-</a>
 
-    <a href="{% url 'logout' %}" class="text-danger mt-3">🚪 <span>Logout</span></a>
+    <a href="{% url 'fest_full_report' %}" class="btn btn-outline-light btn-sm mt-2">
+        📄 Download Full Fest Report
+    </a>
+
+    <a href="{% url 'logout' %}" class="text-warning mt-3">🚪 <span>Logout</span></a>
 </aside>
 
 <!-- ================= CONTENT ================= -->
@@ -134,10 +195,7 @@
 
     <!-- MOBILE MENU BUTTON -->
     <div class="d-md-none mb-3">
-        <button class="btn btn-outline-secondary btn-sm"
-                onclick="toggleSidebar()">
-            ☰ Menu
-        </button>
+        <button class="btn btn-light btn-sm shadow" onclick="toggleSidebar()">☰ Menu</button>
     </div>
 
     {% for message in messages %}
@@ -149,14 +207,14 @@
 
 <!-- ================= JS ================= -->
 <script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
+function toggleSidebar(){
+    const sidebar=document.getElementById('sidebar');
+    const overlay=document.getElementById('overlay');
 
-    if (window.innerWidth <= 768) {
+    if(window.innerWidth<=768){
         sidebar.classList.toggle('mobile-open');
         overlay.classList.toggle('show');
-    } else {
+    }else{
         sidebar.classList.toggle('collapsed');
     }
 }

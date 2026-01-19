@@ -2,46 +2,177 @@
 {% block title %}Results{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid results-wrap">
 
-    <div class="d-flex justify-content-between mb-3">
-        <h3>🏆 Results</h3>
-        <a href="{% url 'result_add' %}" class="btn btn-success">➕ Add Result</a>
+    <!-- ================= HEADER ================= -->
+    <div class="results-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="fw-semibold text-danger mb-1">🏆 Results</h3>
+            <p class="text-muted mb-0">Event-wise result entries</p>
+        </div>
+
+        <a href="{% url 'result_add' %}" class="btn btn-danger btn-sm">
+            ➕ Add Result
+        </a>
     </div>
 
-    <div class="card shadow-sm">
-        <table class="table table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Event</th>
-                    <th>Team</th>
-                    <th>Position</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for r in results %}
-                <tr>
-                    <td>{{ r.event.name }}</td>
-                    <td>{{ r.team.team_name }}</td>
-                    <td>{{ r.position }}</td>
-                    <td class="text-end">
-                        <a href="{% url 'result_edit' r.id %}" class="btn btn-sm btn-warning">Edit</a>
-                        <a href="{% url 'result_delete' r.id %}" class="btn btn-sm btn-danger">Delete</a>
-                        <a href="{% url 'winner_certificate' r.id %}" class="btn btn-sm btn-success">
-                            Certificate
-                        </a>
-                    </td>
+    <!-- ================= DESKTOP TABLE ================= -->
+    <div class="card results-card d-none d-md-block">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="results-thead">
+                    <tr>
+                        <th>Event</th>
+                        <th>Team</th>
+                        <th>Position</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for r in results %}
+                    <tr>
+                        <td class="fw-semibold">{{ r.event.name }}</td>
 
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center text-muted">No results found</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                        <td>
+                            {{ r.team.team_name }}
+                        </td>
+
+                        <td>
+                            <span class="position-badge">
+                                {{ r.position }}
+                            </span>
+                        </td>
+
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                <a href="{% url 'result_edit' r.id %}"
+                                   class="btn btn-sm btn-outline-warning">
+                                    ✏ Edit
+                                </a>
+
+                                <a href="{% url 'result_delete' r.id %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    🗑 Delete
+                                </a>
+
+                                <a href="{% url 'winner_certificate' r.id %}"
+                                   class="btn btn-sm btn-outline-success">
+                                    📄 Certificate
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            No results found
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ================= MOBILE CARD VIEW ================= -->
+    <div class="mobile-results d-md-none">
+        {% for r in results %}
+            <div class="results-card-mobile">
+
+                <div class="fw-semibold mb-1">
+                    {{ r.event.name }}
+                </div>
+
+                <div class="text-muted small mb-2">
+                    {{ r.team.team_name }}
+                </div>
+
+                <div class="position-mobile mb-3">
+                    Position: <strong>{{ r.position }}</strong>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'result_edit' r.id %}"
+                       class="btn btn-outline-warning btn-sm w-100">
+                        ✏ Edit
+                    </a>
+
+                    <a href="{% url 'result_delete' r.id %}"
+                       class="btn btn-outline-danger btn-sm w-100">
+                        🗑 Delete
+                    </a>
+                </div>
+
+                <a href="{% url 'winner_certificate' r.id %}"
+                   class="btn btn-outline-success btn-sm w-100 mt-2">
+                    📄 Certificate
+                </a>
+
+            </div>
+        {% empty %}
+            <div class="text-center text-muted py-4">
+                No results found
+            </div>
+        {% endfor %}
     </div>
 
 </div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.results-wrap{
+    background:#fafafa;
+    padding:12px;
+}
+
+/* HEADER */
+.results-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* DESKTOP CARD */
+.results-card{
+    background:#ffffff;
+    border-radius:16px;
+    border:1px solid #f1f1f1;
+}
+
+/* TABLE HEAD */
+.results-thead{
+    background:#fff5f5;
+}
+
+/* POSITION */
+.position-badge{
+    background:#ffe4e6;
+    color:var(--red);
+    padding:4px 10px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+/* ================= MOBILE CARDS ================= */
+.results-card-mobile{
+    background:#ffffff;
+    border:1px solid #f1f1f1;
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+}
+
+.position-mobile{
+    color:var(--red);
+    font-weight:600;
+}
+</style>
+
 {% endblock %}

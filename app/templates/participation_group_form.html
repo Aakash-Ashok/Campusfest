@@ -1,38 +1,165 @@
 {% extends "base.html" %}
+{% block title %}Group Participation{% endblock %}
+
 {% block content %}
+<div class="container-fluid group-wrap">
 
-<h2>{{ event.name }} – Group Participation</h2>
-
-<form method="post">
-    {% csrf_token %}
-    {{ formset.management_form }}
-
-    <!-- TEAM SELECTED ONCE -->
-    <div class="mb-3">
-        <label class="form-label"><strong>Team</strong></label>
-        <select name="team" class="form-select" required>
-            {% for team in teams %}
-                <option value="{{ team.id }}">{{ team.team_name }}</option>
-            {% endfor %}
-        </select>
+    <!-- ================= HEADER ================= -->
+    <div class="group-header mb-4">
+        <h3 class="fw-semibold text-danger mb-1">
+            {{ event.name }}
+        </h3>
+        <p class="text-muted mb-0">Group Participation Entry</p>
     </div>
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Participant Name</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for form in formset %}
-            <tr>
-                <td>{{ form.participant_name }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <!-- ================= FORM CARD ================= -->
+    <div class="card group-card">
+        <div class="card-body">
 
-    <button type="submit" class="btn btn-success">Save Group</button>
-</form>
+            <form method="post">
+                {% csrf_token %}
+                {{ formset.management_form }}
+
+                <!-- ================= TEAM SELECT ================= -->
+                <div class="team-select mb-4">
+                    <label class="form-label fw-semibold">Team</label>
+                    <select name="team" class="form-select" required>
+                        <option value="" disabled selected>Select a team</option>
+                        {% for team in teams %}
+                            <option value="{{ team.id }}">{{ team.team_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- ================= PARTICIPANTS TABLE ================= -->
+                <div class="participants-section">
+                    <h6 class="fw-semibold text-danger mb-3">
+                        👥 Participants
+                    </h6>
+
+                    <div class="table-responsive">
+                        <table class="table participants-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px">#</th>
+                                    <th>Participant Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for form in formset %}
+                                <tr>
+                                    <td class="text-muted">{{ forloop.counter }}</td>
+                                    <td>{{ form.participant_name }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ================= ACTIONS ================= -->
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% url 'event_list' %}" class="btn btn-outline-secondary btn-sm">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        Save Group
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= STYLES ================= -->
+<style>
+:root{
+    --red:#dc2626;
+    --red-soft:#fff1f2;
+    --border:#e5e7eb;
+}
+
+/* PAGE */
+.group-wrap{
+    background:#fafafa;
+    padding:12px;
+}
+
+/* HEADER */
+.group-header{
+    background:var(--red-soft);
+    padding:18px 22px;
+    border-radius:16px;
+}
+
+/* CARD */
+.group-card{
+    background:#ffffff;
+    border-radius:18px;
+    border:1px solid #f1f1f1;
+    max-width:760px;
+}
+
+/* TEAM SELECT */
+.team-select label{
+    margin-bottom:6px;
+}
+
+.team-select select{
+    border-radius:8px;
+}
+
+/* PARTICIPANTS */
+.participants-section{
+    background:#fff5f5;
+    padding:18px;
+    border-radius:14px;
+}
+
+/* TABLE */
+.participants-table{
+    background:#ffffff;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.participants-table thead{
+    background:#ffe4e6;
+}
+
+.participants-table th,
+.participants-table td{
+    padding:10px 12px;
+}
+
+.participants-table input{
+    width:100%;
+    padding:6px 8px;
+    border-radius:6px;
+    border:1px solid var(--border);
+}
+
+.participants-table input:focus{
+    border-color:var(--red);
+    box-shadow:0 0 0 2px rgba(220,38,38,.12);
+    outline:none;
+}
+
+/* BUTTON */
+.btn-danger{
+    background:var(--red);
+    border:none;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+    .group-card{
+        max-width:100%;
+    }
+}
+</style>
 
 {% endblock %}
