@@ -562,19 +562,33 @@ def participation_edit(request, event_id, team_id):
 
 
 @login_required
-def participation_delete(request, participation_id):
-    participation = get_object_or_404(Participation, id=participation_id)
+def participation_delete(request, event_id, team_id):
+    participations = Participation.objects.filter(
+        event_id=event_id,
+        team_id=team_id
+    )
+
+    if not participations.exists():
+        raise Http404("No participation found")
 
     if request.method == 'POST':
-        participation.delete()
-        messages.success(request, "Participation deleted successfully")
+        participations.delete()
+        messages.success(
+            request,
+            "Team participation deleted successfully"
+        )
         return redirect('participation_list')
 
     return render(
         request,
         'participation_confirm_delete.html',
-        {'participation': participation}
+        {
+            'event': event_id,
+            'team': team_id,
+            'participants': participations,
+        }
     )
+
 
 
 
