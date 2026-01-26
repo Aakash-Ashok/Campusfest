@@ -1084,28 +1084,65 @@ from reportlab.lib.colors import HexColor, black
 from django.contrib.staticfiles import finders
 from reportlab.lib.utils import ImageReader
 
+import io
+import zipfile
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+from reportlab.lib.colors import black
+from django.conf import settings
+from datetime import datetime
+from pathlib import Path
+from .models import Result, Participation
+
+
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from django.conf import settings
+from pathlib import Path
+
+FONT_DIR = Path(settings.BASE_DIR) / "static" / "fonts"
+
+pdfmetrics.registerFont(
+    TTFont("Montserrat-Bold", FONT_DIR / "Montserrat-Bold.ttf")
+)
+pdfmetrics.registerFont(
+    TTFont("Montserrat-SemiBold", FONT_DIR / "Montserrat-SemiBold.ttf")
+)
+pdfmetrics.registerFont(
+    TTFont("GreatVibes", FONT_DIR / "GreatVibes-Regular.ttf")
+)
+pdfmetrics.registerFont(
+    TTFont("AlexBrush", FONT_DIR / "AlexBrush-Regular.ttf")
+)
+
+
+from reportlab.lib.utils import ImageReader
+from django.conf import settings
+from pathlib import Path
+from django.utils.timezone import now
+
+
+def ordinal(n):
+    if 10 <= n % 100 <= 20:
+        return f"{n}th"
+    return f"{n}{ {1:'st', 2:'nd', 3:'rd'}.get(n % 10, 'th') }"
+
+
 def _draw_certificate(
     p, width, height, *,
     name, team, event, position, points, is_winner=True
 ):
-    """
-    Draw certificate using uploaded background image
-    """
+    BASE_DIR = Path(settings.BASE_DIR)
+    CENTER_X = width / 2
 
-    # ---------------- COLORS ----------------
-    TITLE = HexColor("#000000")
-    MUTED = HexColor("#444444")
-
-    # ---------------- BACKGROUND IMAGE ----------------
-    bg_path = os.path.join(
-        settings.BASE_DIR,
-        "static",
-        "certificates",
-        "certificate_bg.png"
-    )
-
+    # ================= BACKGROUND =================
+    bg_path = BASE_DIR / "static" / "certificates" / "certificate_bg.jpeg"
     p.drawImage(
-        ImageReader(bg_path),
+        ImageReader(str(bg_path)),
         0, 0,
         width=width,
         height=height,
@@ -1113,57 +1150,99 @@ def _draw_certificate(
         mask="auto"
     )
 
-    # ---------------- TITLE ----------------
-    p.setFillColor(TITLE)
-    p.setFont("Helvetica-Bold", 36)
+    # ================= Y POSITIONS =================
+    Y_MEDAL = height - 280
+    Y_TITLE = height - 335
+    Y_NAME  = height - 380
 
-    title_text = "CERTIFICATE OF ACHIEVEMENT" if is_winner else "CERTIFICATE OF APPRECIATION"
-    p.drawCentredString(width / 2, height - 130, title_text)
+    Y_BODY_1 = height - 425
+    Y_BODY_2 = height - 450
+    Y_BODY_3 = height - 475
+    Y_BODY_4 = height - 500
 
-    # ---------------- NAME ----------------
-    p.setFont("Helvetica-Bold", 22)
-    p.drawCentredString(width / 2, height - 200, name)
+    Y_FOOTER = 105
 
-    # ---------------- PRESENTED TO ----------------
-    p.setFont("Helvetica", 14)
-    p.setFillColor(MUTED)
-    p.drawCentredString(
-        width / 2,
-        height - 235,
-        f"Team {team.team_name} — Department of {team.department}"
+    # ================= MEDAL IMAGE =================
+    medal_files = {
+        1: "gold.png",
+        2: "silver.png",
+        3: "bronze.png",
+    }
+
+    if is_winner and position in medal_files:
+        medal_path = (
+            BASE_DIR / "static" / "certificates" / "medals" / medal_files[position]
+        )
+        p.drawImage(
+            ImageReader(str(medal_path)),
+            CENTER_X - 45,
+            Y_MEDAL - 50,
+            width=90,
+            height=120,
+            mask="auto"
+        )
+
+    # ================= TITLE =================
+    p.setFillColorRGB(0, 0, 0)
+    p.setFont("Montserrat-Bold", 26)
+
+    title = (
+        "CERTIFICATE OF EXCELLENCE"
+        if is_winner else
+        "CERTIFICATE OF PARTICIPATION"
     )
+    p.drawCentredString(CENTER_X, Y_TITLE, title)
 
-    # ---------------- EVENT INFO ----------------
-    p.setFont("Helvetica-Bold", 15)
-    p.setFillColor(black)
-    p.drawCentredString(width / 2, height - 285, event.name)
+    # ================= NAME (AUTO SIZE) =================
+    max_width = width - 220
+    name_font = 40
 
-    p.setFont("Helvetica", 13)
-    p.drawCentredString(width / 2, height - 315, f"Position : {position}")
-    p.drawCentredString(width / 2, height - 340, f"Points : {points}")
+    while name_font >= 28:
+        p.setFont("AlexBrush", name_font)
+        if p.stringWidth(name, "AlexBrush", name_font) <= max_width:
+            break
+        name_font -= 1
 
-    # ---------------- DESCRIPTION ----------------
-    p.setFont("Helvetica-Oblique", 11)
-    p.setFillColor(MUTED)
-    p.drawCentredString(
-        width / 2,
-        height - 390,
-        "For achievements and participation in Ramitham 2025–26"
-    )
-    p.drawCentredString(
-        width / 2,
-        height - 410,
-        "Held on 27, 28 & 29 January 2026 by Department Students’ Union"
-    )
+    p.drawCentredString(CENTER_X, Y_NAME, name)
 
-    # ---------------- FOOTER DATE ----------------
-    p.setFont("Helvetica-Oblique", 9)
-    p.drawCentredString(
-        width / 2,
-        90,
-        f"Issued on {now().strftime('%d %B %Y')}"
-    )
+    # ================= BODY TEXT (AUTO SIZE) =================
+    body_lines = [
+        f"This is to certify that {name} of {team.department} Department has",
+        (
+            f"secured {ordinal(position)} Position in the event “{event.name}” on ,"
+            if is_winner else
+            f"participated in the event “{event.name}” on ,"
+        ),
+        "RAMITHAM Campus Fest conducted by Department Students Union,",
+        "Dr. Janaki Ammal Campus, Kannur University, Palayad",
+    ]
 
+    body_font = 15
+    body_min = 12
+
+    while body_font >= body_min:
+        p.setFont("Montserrat-SemiBold", body_font)
+        if all(
+            p.stringWidth(line, "Montserrat-SemiBold", body_font) <= max_width
+            for line in body_lines
+        ):
+            break
+        body_font -= 0.5
+
+    p.setFont("Montserrat-SemiBold", body_font)
+
+    p.drawCentredString(CENTER_X, Y_BODY_1, body_lines[0])
+    p.drawCentredString(CENTER_X, Y_BODY_2, body_lines[1])
+    p.drawCentredString(CENTER_X, Y_BODY_3, body_lines[2])
+    p.drawCentredString(CENTER_X, Y_BODY_4, body_lines[3])
+
+    # ================= FOOTER =================
+    # p.setFont("Montserrat-SemiBold", 9)
+    # p.drawCentredString(
+    #     CENTER_X,
+    #     Y_FOOTER,
+    #     f"Issued on {now().strftime('%d %B %Y')}"
+    # )
 
 
 
@@ -1182,12 +1261,12 @@ def generate_winner_certificate(request, result_id):
     )
 
     # ================= SINGLE EVENT =================
-    if event.event_type == "SINGLE":
+    if event.event_type == 'SINGLE':
         participant = participants.first()
 
-        response = HttpResponse(content_type="application/pdf")
-        response["Content-Disposition"] = (
-            f'attachment; filename="{participant.participant_name}_{event.name}.pdf"'
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = (
+            f'attachment; filename="{participant.participant_name}_{event.name}_Certificate.pdf"'
         )
 
         p = canvas.Canvas(response, pagesize=A4)
@@ -1211,7 +1290,7 @@ def generate_winner_certificate(request, result_id):
 
     # ================= GROUP EVENT =================
     zip_buffer = io.BytesIO()
-    zip_file = zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED)
+    zip_file = zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED)
 
     for member in participants:
         pdf_buffer = io.BytesIO()
@@ -1232,20 +1311,21 @@ def generate_winner_certificate(request, result_id):
 
         p.showPage()
         p.save()
-
         pdf_buffer.seek(0)
-        filename = f"{member.participant_name}_{event.name}.pdf"
+
+        filename = f"{member.participant_name}_{event.name}_Certificate.pdf"
         zip_file.writestr(filename, pdf_buffer.read())
 
     zip_file.close()
     zip_buffer.seek(0)
 
-    response = HttpResponse(zip_buffer, content_type="application/zip")
-    response["Content-Disposition"] = (
+    response = HttpResponse(zip_buffer, content_type='application/zip')
+    response['Content-Disposition'] = (
         f'attachment; filename="{team.team_name}_{event.name}_Certificates.zip"'
     )
 
     return response
+
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
